@@ -5,16 +5,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Mapa Inteligente Hacienda Nápoles - Pangea</title>
+<title>HN SmartMap - Pangea</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
 
-html,body,#map{
+html,body{
 height:100%;
 margin:0;
-padding:0;
+}
+
+#map{
+height:100%;
+width:100%;
 }
 
 .info{
@@ -26,8 +30,14 @@ background:white;
 padding:10px;
 border-radius:8px;
 font-family:Arial;
-font-size:14px;
 box-shadow:0 0 10px rgba(0,0,0,.3);
+}
+
+button{
+width:100%;
+margin-top:6px;
+padding:8px;
+cursor:pointer;
 }
 
 </style>
@@ -37,89 +47,140 @@ box-shadow:0 0 10px rgba(0,0,0,.3);
 <body>
 
 <div class="info">
-<b>Mapa Inteligente Hacienda Nápoles</b><br>
-Prueba Inicial
+
+<b>HN SmartMap</b><br>
+Pangea<br><br>
+
+<div id="lista"></div>
+
+<button onclick="ubicar()">
+
+Mi ubicación
+
+</button>
+
 </div>
 
 <div id="map"></div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-var map=L.map('map').setView([5.9233,-74.7268],18);
+var mapa=L.map('map');
 
-L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
-maxZoom:22
-}).addTo(map);
+var limites=[
 
+[5.922010,-74.728629],
 
-//-------------------------------------
-// ORTOMOSAICO
-//-------------------------------------
+[5.925396,-74.724673]
 
-var bounds=[
-[5.92455,-74.72815],
-[5.92205,-74.72510]
 ];
 
+L.tileLayer(
+
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+
+{
+
+maxZoom:22
+
+}
+
+).addTo(mapa);
+
 L.imageOverlay(
+
 'Ortomosaico_2.jpg',
-bounds
-).addTo(map);
 
-map.fitBounds(bounds);
+limites
 
+).addTo(mapa);
 
-//-------------------------------------
-// CARGAR PUNTOS DESDE GEOJSON
-//-------------------------------------
+mapa.fitBounds(limites);
 
-fetch("puntos_pangea.geojson")
+fetch('puntos_pangea.geojson')
 
-.then(response=>response.json())
+.then(r=>r.json())
 
-.then(function(data){
+.then(function(datos){
 
-L.geoJSON(data,{
+var lista=document.getElementById("lista");
+
+L.geoJSON(datos,{
 
 onEachFeature:function(feature,layer){
 
-let nombre="";
-
-if(feature.properties.Nombre)
-nombre=feature.properties.Nombre;
+var nombre=feature.properties.Nombre;
 
 layer.bindPopup("<b>"+nombre+"</b>");
 
+var b=document.createElement("button");
+
+b.innerHTML=nombre;
+
+b.onclick=function(){
+
+mapa.flyTo(layer.getLatLng(),20);
+
+layer.openPopup();
+
+};
+
+lista.appendChild(b);
+
 }
 
-}).addTo(map);
+}).addTo(mapa);
 
 });
+function ubicar(){
 
+if(navigator.geolocation){
 
-//-------------------------------------
-// UBICACIÓN DEL CELULAR
-//-------------------------------------
+navigator.geolocation.getCurrentPosition(
 
-map.locate({
-setView:true,
-maxZoom:20
-});
+function(pos){
 
-function onLocationFound(e){
+var lat=pos.coords.latitude;
 
-L.marker(e.latlng)
-.addTo(map)
-.bindPopup("Usted está aquí")
+var lon=pos.coords.longitude;
+
+L.marker([lat,lon])
+
+.addTo(mapa)
+
+.bindPopup("📍 Usted está aquí")
+
 .openPopup();
 
+mapa.flyTo([lat,lon],20);
+
+},
+
+function(){
+
+alert("No fue posible obtener la ubicación.");
+
+},
+
+{
+
+enableHighAccuracy:true
+
 }
 
-map.on('locationfound',onLocationFound);
+);
+
+}
+
+else{
+
+alert("Su navegador no soporta GPS.");
+
+}
+
+}
 
 </script>
 
