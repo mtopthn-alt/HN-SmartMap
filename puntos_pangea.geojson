@@ -1,0 +1,10 @@
+{
+"type": "FeatureCollection",
+"name": "puntos_pangea",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{"type":"Feature","properties":{"Nombre":"Museo Mundo de Pangea","Tipo":"Museo","descripcion":"Museo principal Pangea"},"geometry":{"type":"Point","coordinates":[-74.726276438024215,5.924134092765478]}},
+{"type":"Feature","properties":{"Nombre":"Pangea Kids","Tipo":"Atraccion","descripcion":"Zona infantil pangea"},"geometry":{"type":"Point","coordinates":[-74.725316771901433,5.92457116842537]}},
+{"type":"Feature","properties":{"Nombre":"Punto de venta pangea","Tipo":"punto de venta ","descripcion":"Punto de hidratacion"},"geometry":{"type":"Point","coordinates":[-74.725812177102867,5.924641111088335]}}
+]
+}
