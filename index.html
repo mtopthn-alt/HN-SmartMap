@@ -58,12 +58,99 @@ html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif}
   .panel{left:45px;top:8px;width:245px;max-height:52vh;padding:11px}
   .titulo{font-size:17px}
 }
+
+/* =========================
+   INTERFAZ MÓVIL / PANEL PLEGABLE
+========================= */
+#menuToggle{
+  position:absolute;
+  top:12px;
+  left:12px;
+  z-index:1200;
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:10px;
+  background:rgba(255,255,255,.97);
+  box-shadow:0 3px 12px rgba(0,0,0,.25);
+  font-size:23px;
+  cursor:pointer;
+  display:none;
+}
+
+.panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+#cerrarPanel{
+  border:0;
+  background:transparent;
+  font-size:20px;
+  cursor:pointer;
+  display:none;
+}
+
+@media(max-width:600px){
+  #menuToggle{
+    display:block;
+  }
+
+  .panel{
+    position:absolute;
+    left:12px;
+    top:12px;
+    width:min(330px, calc(100vw - 24px));
+    max-height:calc(100vh - 24px);
+    padding:14px;
+    transform:translateX(calc(-100% - 24px));
+    transition:transform .22s ease;
+    box-sizing:border-box;
+  }
+
+  .panel.abierto{
+    transform:translateX(0);
+  }
+
+  #cerrarPanel{
+    display:block;
+  }
+
+  .dev-only{
+    display:none !important;
+  }
+
+  body.panel-abierto #menuToggle{
+    display:none;
+  }
+
+  .ruta-info{
+    font-size:14px;
+  }
+
+  .boton-punto{
+    padding:11px 10px;
+    font-size:14px;
+  }
+
+  .accion{
+    padding:12px;
+    font-size:14px;
+  }
+}
+
 </style>
 </head>
 
 <body>
-<div class="panel">
-  <div class="titulo">HN SmartMap</div>
+<button id="menuToggle" aria-label="Abrir menú">☰</button>
+<div id="panelPrincipal" class="panel">
+  <div class="panel-head">
+    <div class="titulo">HN SmartMap</div>
+    <button id="cerrarPanel" aria-label="Cerrar menú">✕</button>
+  </div>
   <div class="subtitulo">Mundo Pangea</div>
   <div id="horarioPangea" class="horario"></div>
 
@@ -71,7 +158,7 @@ html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif}
   <div id="lista"></div>
 
   <button id="ubicacion" class="accion">📍 Mi ubicación</button>
-  <button id="modoPrueba" class="accion">🧪 Probar desde entrada Pangea</button>
+  <button id="modoPrueba" class="accion dev-only">🧪 Probar desde entrada Pangea</button>
   <button id="limpiarRuta" class="accion">✖ Limpiar ruta</button>
 
   <div id="rutaInfo" class="ruta-info"></div>
@@ -79,6 +166,20 @@ html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif}
 </div>
 
 <div id="map"></div>
+<div id="rutaMini" style="
+  display:none;
+  position:absolute;
+  left:50%;
+  bottom:22px;
+  transform:translateX(-50%);
+  z-index:1100;
+  background:rgba(255,255,255,.96);
+  padding:9px 13px;
+  border-radius:20px;
+  box-shadow:0 3px 12px rgba(0,0,0,.25);
+  font:600 13px Arial,Helvetica,sans-serif;
+  white-space:nowrap;
+"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -86,6 +187,35 @@ html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif}
    CONFIGURACIÓN
 ===================================================== */
 const VERSION = "7";
+
+const panelPrincipal = document.getElementById("panelPrincipal");
+const menuToggle = document.getElementById("menuToggle");
+const cerrarPanel = document.getElementById("cerrarPanel");
+
+function abrirPanel(){
+  panelPrincipal.classList.add("abierto");
+  document.body.classList.add("panel-abierto");
+}
+
+function cerrarPanelMovil(){
+  panelPrincipal.classList.remove("abierto");
+  document.body.classList.remove("panel-abierto");
+}
+
+menuToggle.addEventListener("click", abrirPanel);
+cerrarPanel.addEventListener("click", cerrarPanelMovil);
+
+// En escritorio queda siempre visible.
+// En celular se abre al inicio y se oculta automáticamente luego de unos segundos.
+if(window.matchMedia("(max-width:600px)").matches){
+  abrirPanel();
+  setTimeout(() => {
+    if(!rutaActual) cerrarPanelMovil();
+  }, 3500);
+}else{
+  panelPrincipal.classList.add("abierto");
+}
+
 const VELOCIDAD_CAMINANDO_M_MIN = 75;
 const TOLERANCIA_UNION_RED_M = 8;
 const MAX_DISTANCIA_ORIGEN_RED_M = 150;
@@ -133,6 +263,7 @@ const buscar = document.getElementById("buscar");
 const horarioPangea = document.getElementById("horarioPangea");
 const rutaInfo = document.getElementById("rutaInfo");
 const btnLimpiar = document.getElementById("limpiarRuta");
+const rutaMini = document.getElementById("rutaMini");
 
 function actualizarHorarioPangea(){
   const ahora = new Date();
@@ -415,9 +546,15 @@ function navegarA(layer,nombre){
     "🚶 " + minutos + " min caminando";
 
   btnLimpiar.style.display = "block";
+  rutaMini.style.display = "block";
+  rutaMini.innerHTML = "🧭 " + nombre + " · " + Math.round(distanciaTotal) + " m · " + minutos + " min";
 
   estado.textContent = "Ruta calculada sobre los senderos de Pangea";
   mapa.fitBounds(rutaActual.getBounds(),{padding:[60,60]});
+  if(window.matchMedia("(max-width:600px)").matches){
+    abrirPanel();
+    setTimeout(cerrarPanelMovil,4500);
+  }
 }
 
 function limpiarRuta(){
@@ -428,6 +565,7 @@ function limpiarRuta(){
   rutaInfo.style.display = "none";
   rutaInfo.innerHTML = "";
   btnLimpiar.style.display = "none";
+  rutaMini.style.display = "none";
 }
 
 btnLimpiar.addEventListener("click",limpiarRuta);
@@ -507,6 +645,9 @@ fetch("./puntos_pangea.geojson?v=" + VERSION)
       boton.onclick = function(){
         mapa.flyTo(layer.getLatLng(),20,{duration:.8});
         setTimeout(() => layer.openPopup(),450);
+        if(window.matchMedia("(max-width:600px)").matches){
+          setTimeout(cerrarPanelMovil,700);
+        }
       };
 
       lista.appendChild(boton);
