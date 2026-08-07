@@ -1,260 +1,796 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<title>HN SmartMap - Pangea</title>
+<title>HN SmartMap - Mundo Pangea</title>
 
 <link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
 
 <style>
-html, body {
-  height: 100%;
-  margin: 0;
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 #map {
-  height: 100%;
-  width: 100%;
+    width: 100%;
+    height: 100%;
 }
 
-.info {
-  position: absolute;
-  top: 10px;
-  left: 50px;
-  z-index: 1000;
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-  font-family: Arial;
-  box-shadow: 0 0 10px rgba(0,0,0,.3);
-  width: 260px;
+
+/* PANEL */
+
+.panel {
+    position: absolute;
+    top: 12px;
+    left: 55px;
+    z-index: 1000;
+
+    width: 290px;
+    max-height: calc(100vh - 40px);
+
+    background: rgba(255,255,255,0.96);
+
+    border-radius: 12px;
+
+    box-shadow:
+    0 4px 18px rgba(0,0,0,0.25);
+
+    padding: 14px;
+
+    overflow-y: auto;
 }
 
-button {
-  width: 100%;
-  margin-top: 6px;
-  padding: 8px;
-  cursor: pointer;
+
+.titulo {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 3px;
 }
-</style>
-</head>
 
-<body>
-
-<div class="info">
-  <b>HN SmartMap</b><br>
-  Mundo Pangea<br><br>
-
-  <div id="lista"></div>
-
-  <button onclick="ubicar()">📍 Mi ubicación</button>
-</div>
-
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-
-// ---------------------------
-// CREAR MAPA
-// ---------------------------
-
-var mapa = L.map('map', {
-  minZoom: 16,
-  maxZoom: 22
-});
+.subtitulo {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
 
 
-// ---------------------------
-// MAPA BASE OPENSTREETMAP
-// ---------------------------
+/* BOTONES */
 
-var osm = L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    maxZoom: 22,
-    attribution: '&copy; OpenStreetMap'
-  }
-).addTo(mapa);
+.boton-punto {
 
+    width: 100%;
 
-// ---------------------------
-// ORTOMOSAICO PANGEA
-// TESSELAS GENERADAS POR QGIS
-// ---------------------------
+    margin-bottom: 6px;
 
-var pangea = L.tileLayer(
-  './{z}/{x}/{y}.jpg',
-  {
-    minZoom: 17,
-    maxZoom: 21,
-    maxNativeZoom: 21,
-    tms: false,
-    opacity: 1
-  }
-).addTo(mapa);
+    padding: 9px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 7px;
+
+    background: white;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    font-size: 13px;
+}
+
+.boton-punto:hover {
+    background: #f1f1f1;
+}
 
 
-// ---------------------------
-// EXTENSIÓN DE PANGEA
-// ---------------------------
+#ubicacion {
 
-var limites = [
-  [5.922010, -74.728629],
-  [5.925396, -74.724673]
-];
+    width: 100%;
 
-mapa.fitBounds(limites);
+    margin-top: 10px;
 
+    padding: 10px;
 
-// ---------------------------
-// CONTROL DE CAPAS
-// ---------------------------
+    border: none;
 
-L.control.layers(
-  {
-    "OpenStreetMap": osm
-  },
-  {
-    "Ortomosaico Pangea": pangea
-  }
-).addTo(mapa);
+    border-radius: 7px;
+
+    background: #26734d;
+
+    color: white;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
 
 
-// ---------------------------
-// CARGAR PUNTOS GEOJSON
-// ---------------------------
+.estado {
 
-fetch('puntos_pangea.geojson')
+    margin-top: 8px;
 
-.then(r => r.json())
+    font-size: 12px;
 
-.then(function(datos){
+    color: #555;
+}
 
-  var lista = document.getElementById("lista");
 
-  L.geoJSON(datos, {
+/* MARCADOR */
 
-    onEachFeature: function(feature, layer){
+.punto-hn {
 
-      var nombre =
-        feature.properties.Nombre ||
-        feature.properties.nombre ||
-        "Punto de interés";
+    width: 16px;
 
-      var tipo =
-        feature.properties.Tipo ||
-        feature.properties.tipo ||
-        "";
+    height: 16px;
 
-      var descripcion =
-        feature.properties.descripcion ||
-        feature.properties.Descripcion ||
-        "";
+    background: #e53935;
 
-      var contenido =
-        "<b>" + nombre + "</b>";
+    border: 3px solid white;
 
-      if(tipo){
-        contenido += "<br>" + tipo;
-      }
+    border-radius: 50%;
 
-      if(descripcion){
-        contenido += "<br>" + descripcion;
-      }
+    box-shadow: 0 1px 5px rgba(0,0,0,.7);
+}
 
-      layer.bindPopup(contenido);
 
-      var boton = document.createElement("button");
+/* CELULAR */
 
-      boton.innerHTML = nombre;
+@media(max-width:600px){
 
-      boton.onclick = function(){
+    .panel {
 
-        mapa.flyTo(
-          layer.getLatLng(),
-          20
-        );
+        left: 45px;
 
-        layer.openPopup();
+        top: 8px;
 
-      };
+        width: 230px;
 
-      lista.appendChild(boton);
+        max-height: 45vh;
 
     }
 
-  }).addTo(mapa);
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="panel">
+
+    <div class="titulo">
+        HN SmartMap
+    </div>
+
+    <div class="subtitulo">
+        Mundo Pangea
+    </div>
+
+    <div id="lista"></div>
+
+    <button id="ubicacion">
+        📍 Mi ubicación
+    </button>
+
+    <div class="estado" id="estado">
+        Cargando mapa...
+    </div>
+
+</div>
+
+
+<div id="map"></div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+<script>
+
+
+// ======================================================
+// MAPA
+// ======================================================
+
+const mapa = L.map("map", {
+
+    minZoom: 16,
+
+    maxZoom: 22,
+
+    zoomControl: true
 
 });
 
 
-// ---------------------------
-// UBICACIÓN DEL VISITANTE
-// ---------------------------
 
-var marcadorUsuario;
+// ======================================================
+// MAPA BASE OPENSTREETMAP
+// ======================================================
 
-function ubicar(){
+const osm = L.tileLayer(
 
-  if(!navigator.geolocation){
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 
-    alert("Su navegador no soporta GPS.");
-    return;
+    {
 
-  }
+        maxZoom: 22,
 
-  navigator.geolocation.getCurrentPosition(
+        attribution: "&copy; OpenStreetMap"
 
-    function(pos){
+    }
 
-      var lat = pos.coords.latitude;
-      var lon = pos.coords.longitude;
+).addTo(mapa);
 
-      if(marcadorUsuario){
 
-        marcadorUsuario.setLatLng([lat,lon]);
 
-      } else {
+// ======================================================
+// ORTOMOSAICO PANGEA - TESELAS XYZ QGIS
+// ======================================================
 
-        marcadorUsuario = L.marker([lat,lon])
-        .addTo(mapa)
-        .bindPopup("📍 Usted está aquí");
+const ortomosaico = L.tileLayer(
 
-      }
+    "./{z}/{x}/{y}.png",
 
-      marcadorUsuario.openPopup();
+    {
 
-      mapa.flyTo(
-        [lat,lon],
-        20
-      );
+        minZoom: 17,
 
-    },
+        maxZoom: 21,
 
-    function(){
+        maxNativeZoom: 21,
 
-      alert("No fue posible obtener la ubicación. Autoriza el GPS.");
+        minNativeZoom: 17,
+
+        tms: false,
+
+        opacity: 1,
+
+        attribution: "Ortomosaico Hacienda Nápoles"
+
+    }
+
+).addTo(mapa);
+
+
+
+// ======================================================
+// EXTENSIÓN DEL ORTOMOSAICO
+// ======================================================
+
+const limitesPangea = [
+
+    [5.922009730, -74.728636],
+
+    [5.925396137, -74.724673180]
+
+];
+
+
+mapa.fitBounds(limitesPangea);
+
+
+
+// ======================================================
+// CONTROL DE CAPAS
+// ======================================================
+
+L.control.layers(
+
+    {
+
+        "Mapa base": osm
 
     },
 
     {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0
+
+        "Ortomosaico Pangea": ortomosaico
+
+    },
+
+    {
+
+        collapsed: true
+
     }
 
-  );
+).addTo(mapa);
+
+
+
+// ======================================================
+// ICONO DE PUNTOS
+// ======================================================
+
+const iconoHN = L.divIcon({
+
+    className: "",
+
+    html: '<div class="punto-hn"></div>',
+
+    iconSize: [22,22],
+
+    iconAnchor: [11,11],
+
+    popupAnchor: [0,-12]
+
+});
+
+
+
+// ======================================================
+// LEER PROPIEDADES
+// ======================================================
+
+function propiedad(objeto, nombres) {
+
+    for(const nombre of nombres){
+
+        if(
+            objeto &&
+            objeto[nombre] !== undefined &&
+            objeto[nombre] !== null
+        ){
+
+            return String(objeto[nombre]);
+
+        }
+
+    }
+
+    return "";
 
 }
 
+
+
+// ======================================================
+// CARGAR PUNTOS GEOJSON
+// ======================================================
+
+const lista =
+document.getElementById("lista");
+
+const estado =
+document.getElementById("estado");
+
+
+fetch("./puntos_pangea.geojson")
+
+.then(respuesta => {
+
+    if(!respuesta.ok){
+
+        throw new Error(
+            "No se encontró puntos_pangea.geojson"
+        );
+
+    }
+
+    return respuesta.json();
+
+})
+
+.then(datos => {
+
+
+    const capaPuntos = L.geoJSON(
+
+        datos,
+
+        {
+
+
+        pointToLayer:
+        function(feature, latlng){
+
+            return L.marker(
+
+                latlng,
+
+                {
+
+                    icon: iconoHN
+
+                }
+
+            );
+
+        },
+
+
+        onEachFeature:
+        function(feature, layer){
+
+
+            const p =
+            feature.properties || {};
+
+
+            const nombre =
+
+            propiedad(
+                p,
+                [
+                    "Nombre",
+                    "nombre",
+                    "NAME",
+                    "name"
+                ]
+            )
+
+            || "Punto de interés";
+
+
+            const tipo =
+
+            propiedad(
+                p,
+                [
+                    "Tipo",
+                    "tipo",
+                    "TYPE",
+                    "type"
+                ]
+            );
+
+
+            const descripcion =
+
+            propiedad(
+                p,
+                [
+                    "Descripcion",
+                    "Descripción",
+                    "descripcion",
+                    "descripción"
+                ]
+            );
+
+
+            let contenido =
+
+            "<b>" +
+            nombre +
+            "</b>";
+
+
+            if(tipo){
+
+                contenido +=
+
+                "<br>" +
+                tipo;
+
+            }
+
+
+            if(descripcion){
+
+                contenido +=
+
+                "<br><br>" +
+                descripcion;
+
+            }
+
+
+            layer.bindPopup(
+                contenido
+            );
+
+
+
+            // BOTÓN LATERAL
+
+            const boton =
+
+            document.createElement(
+                "button"
+            );
+
+
+            boton.className =
+            "boton-punto";
+
+
+            boton.innerHTML =
+            "📍 " + nombre;
+
+
+            boton.onclick =
+            function(){
+
+
+                mapa.flyTo(
+
+                    layer.getLatLng(),
+
+                    20,
+
+                    {
+
+                        duration: 0.8
+
+                    }
+
+                );
+
+
+                layer.openPopup();
+
+            };
+
+
+            lista.appendChild(
+                boton
+            );
+
+
+        }
+
+
+    }
+
+    ).addTo(mapa);
+
+
+    estado.innerHTML =
+    "Mapa listo · " +
+    datos.features.length +
+    " puntos cargados";
+
+
+})
+
+.catch(error => {
+
+    console.error(error);
+
+    estado.innerHTML =
+    "⚠ No fue posible cargar los puntos.";
+
+});
+
+
+
+// ======================================================
+// UBICACIÓN GPS
+// ======================================================
+
+let marcadorUsuario = null;
+
+let circuloPrecision = null;
+
+
+document
+.getElementById("ubicacion")
+.addEventListener(
+
+"click",
+
+function(){
+
+
+    if(
+        !navigator.geolocation
+    ){
+
+        alert(
+            "Este dispositivo no permite obtener la ubicación."
+        );
+
+        return;
+
+    }
+
+
+    estado.innerHTML =
+    "Buscando ubicación...";
+
+
+    navigator.geolocation.getCurrentPosition(
+
+
+        function(posicion){
+
+
+            const lat =
+            posicion.coords.latitude;
+
+
+            const lon =
+            posicion.coords.longitude;
+
+
+            const precision =
+            posicion.coords.accuracy;
+
+
+
+            if(
+                marcadorUsuario
+            ){
+
+
+                marcadorUsuario
+                .setLatLng(
+                    [lat,lon]
+                );
+
+
+                circuloPrecision
+                .setLatLng(
+                    [lat,lon]
+                );
+
+
+                circuloPrecision
+                .setRadius(
+                    precision
+                );
+
+
+            }
+
+            else {
+
+
+                marcadorUsuario =
+
+                L.circleMarker(
+
+                    [lat,lon],
+
+                    {
+
+                        radius: 8,
+
+                        color: "white",
+
+                        weight: 3,
+
+                        fillColor: "#1976d2",
+
+                        fillOpacity: 1
+
+                    }
+
+                )
+
+                .addTo(mapa)
+
+                .bindPopup(
+                    "📍 Usted está aquí"
+                );
+
+
+
+                circuloPrecision =
+
+                L.circle(
+
+                    [lat,lon],
+
+                    {
+
+                        radius:
+                        precision,
+
+                        weight: 1,
+
+                        fillOpacity: 0.08
+
+                    }
+
+                )
+
+                .addTo(mapa);
+
+
+            }
+
+
+            mapa.flyTo(
+
+                [lat,lon],
+
+                20
+
+            );
+
+
+            marcadorUsuario
+            .openPopup();
+
+
+            estado.innerHTML =
+
+            "Ubicación encontrada · precisión aprox. " +
+
+            Math.round(
+                precision
+            )
+
+            + " m";
+
+
+        },
+
+
+        function(error){
+
+
+            console.error(error);
+
+
+            estado.innerHTML =
+            "No fue posible obtener tu ubicación.";
+
+
+            alert(
+                "Autoriza el uso de ubicación en el navegador."
+            );
+
+
+        },
+
+
+        {
+
+            enableHighAccuracy: true,
+
+            timeout: 15000,
+
+            maximumAge: 0
+
+        }
+
+
+    );
+
+
+}
+
+);
+
+
+// ======================================================
+// ERROR EN TESELAS
+// ======================================================
+
+ortomosaico.on(
+
+    "tileerror",
+
+    function(error){
+
+        console.log(
+            "Tesela no encontrada:",
+            error.tile.src
+        );
+
+    }
+
+);
+
+
 </script>
 
+
 </body>
+
 </html>
