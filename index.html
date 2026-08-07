@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
@@ -15,147 +15,210 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 <style>
 
 html,
-body {
-    height: 100%;
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+body{
+    height:100%;
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-#map {
-    width: 100%;
-    height: 100%;
+#map{
+    height:100%;
+    width:100%;
 }
 
+/* =========================
+   PANEL PRINCIPAL
+========================= */
 
-/* PANEL */
+.panel{
+    position:absolute;
+    top:12px;
+    left:55px;
+    z-index:1000;
 
-.panel {
-    position: absolute;
-    top: 12px;
-    left: 55px;
-    z-index: 1000;
+    width:290px;
+    max-height:calc(100vh - 40px);
 
-    width: 290px;
-    max-height: calc(100vh - 40px);
+    padding:14px;
 
-    background: rgba(255,255,255,0.96);
+    background:rgba(255,255,255,.96);
 
-    border-radius: 12px;
+    border-radius:12px;
 
-    box-shadow:
-    0 4px 18px rgba(0,0,0,0.25);
+    box-shadow:0 4px 18px rgba(0,0,0,.28);
 
-    padding: 14px;
-
-    overflow-y: auto;
+    overflow-y:auto;
 }
 
-
-.titulo {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 3px;
+.titulo{
+    font-size:20px;
+    font-weight:bold;
 }
 
-.subtitulo {
-    color: #666;
-    font-size: 13px;
-    margin-bottom: 12px;
+.subtitulo{
+    font-size:13px;
+    color:#666;
+    margin-top:2px;
+    margin-bottom:12px;
 }
 
+/* =========================
+   BUSCADOR
+========================= */
 
-/* BOTONES */
+#buscar{
+    width:100%;
+    box-sizing:border-box;
 
-.boton-punto {
+    padding:9px;
 
-    width: 100%;
+    margin-bottom:10px;
 
-    margin-bottom: 6px;
+    border:1px solid #ccc;
+    border-radius:7px;
 
-    padding: 9px;
-
-    border: 1px solid #ddd;
-
-    border-radius: 7px;
-
-    background: white;
-
-    cursor: pointer;
-
-    text-align: left;
-
-    font-size: 13px;
+    font-size:13px;
 }
 
-.boton-punto:hover {
-    background: #f1f1f1;
+/* =========================
+   BOTONES DE PUNTOS
+========================= */
+
+.boton-punto{
+    width:100%;
+
+    margin-bottom:6px;
+
+    padding:9px;
+
+    border:1px solid #ddd;
+
+    border-radius:7px;
+
+    background:white;
+
+    cursor:pointer;
+
+    text-align:left;
+
+    font-size:13px;
 }
 
-
-#ubicacion {
-
-    width: 100%;
-
-    margin-top: 10px;
-
-    padding: 10px;
-
-    border: none;
-
-    border-radius: 7px;
-
-    background: #26734d;
-
-    color: white;
-
-    font-weight: bold;
-
-    cursor: pointer;
+.boton-punto:hover{
+    background:#f2f2f2;
 }
 
+/* =========================
+   BOTÓN GPS
+========================= */
 
-.estado {
+#ubicacion{
+    width:100%;
 
-    margin-top: 8px;
+    margin-top:10px;
 
-    font-size: 12px;
+    padding:10px;
 
-    color: #555;
+    border:0;
+
+    border-radius:7px;
+
+    background:#26734d;
+
+    color:white;
+
+    font-weight:bold;
+
+    cursor:pointer;
 }
 
-
-/* MARCADOR */
-
-.punto-hn {
-
-    width: 16px;
-
-    height: 16px;
-
-    background: #e53935;
-
-    border: 3px solid white;
-
-    border-radius: 50%;
-
-    box-shadow: 0 1px 5px rgba(0,0,0,.7);
+#ubicacion:hover{
+    background:#1d5c3d;
 }
 
+.estado{
+    margin-top:9px;
 
-/* CELULAR */
+    font-size:12px;
+
+    color:#666;
+}
+
+/* =========================
+   MARCADORES
+========================= */
+
+.punto-hn{
+    width:17px;
+    height:17px;
+
+    background:#e53935;
+
+    border:3px solid white;
+
+    border-radius:50%;
+
+    box-shadow:0 2px 6px rgba(0,0,0,.55);
+}
+
+/* =========================
+   POPUP
+========================= */
+
+.popup-titulo{
+    font-size:16px;
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.popup-tipo{
+    font-size:12px;
+    color:#666;
+    margin-bottom:8px;
+}
+
+.popup-descripcion{
+    font-size:13px;
+    margin-bottom:10px;
+}
+
+.popup-boton{
+    display:block;
+
+    padding:8px 10px;
+
+    background:#26734d;
+
+    color:white !important;
+
+    text-decoration:none;
+
+    border-radius:6px;
+
+    text-align:center;
+
+    font-weight:bold;
+}
+
+/* =========================
+   CELULAR
+========================= */
 
 @media(max-width:600px){
 
-    .panel {
+    .panel{
+        left:45px;
+        top:8px;
 
-        left: 45px;
+        width:235px;
 
-        top: 8px;
+        max-height:48vh;
 
-        width: 230px;
+        padding:11px;
+    }
 
-        max-height: 45vh;
-
+    .titulo{
+        font-size:17px;
     }
 
 }
@@ -164,9 +227,7 @@ body {
 
 </head>
 
-
 <body>
-
 
 <div class="panel">
 
@@ -178,18 +239,26 @@ body {
         Mundo Pangea
     </div>
 
+    <input
+        id="buscar"
+        type="text"
+        placeholder="🔍 Buscar punto..."
+    >
+
     <div id="lista"></div>
 
     <button id="ubicacion">
         📍 Mi ubicación
     </button>
 
-    <div class="estado" id="estado">
-        Cargando mapa...
+    <div
+        class="estado"
+        id="estado"
+    >
+        Cargando...
     </div>
 
 </div>
-
 
 <div id="map"></div>
 
@@ -199,26 +268,25 @@ body {
 
 <script>
 
+/* =====================================================
+   MAPA
+===================================================== */
 
-// ======================================================
-// MAPA
-// ======================================================
+const mapa = L.map("map",{
 
-const mapa = L.map("map", {
+    minZoom:16,
+    maxZoom:22,
 
-    minZoom: 16,
+    zoomControl:true,
 
-    maxZoom: 22,
-
-    zoomControl: true
+    preferCanvas:true
 
 });
 
 
-
-// ======================================================
-// MAPA BASE OPENSTREETMAP
-// ======================================================
+/* =====================================================
+   MAPA BASE
+===================================================== */
 
 const osm = L.tileLayer(
 
@@ -226,126 +294,219 @@ const osm = L.tileLayer(
 
     {
 
-        maxZoom: 22,
+        minZoom:1,
 
-        attribution: "&copy; OpenStreetMap"
+        maxZoom:22,
+
+        maxNativeZoom:19,
+
+        attribution:"&copy; OpenStreetMap"
 
     }
 
 ).addTo(mapa);
 
 
+/* =====================================================
+   LÍMITES PANGEA
+===================================================== */
 
-// ======================================================
-// ORTOMOSAICO PANGEA - TESELAS XYZ QGIS
-// ======================================================
+const limitesPangea = L.latLngBounds(
+
+    [5.922009730,-74.728636],
+
+    [5.925396137,-74.724673180]
+
+);
+
+
+/* =====================================================
+   ORTOMOSAICO QGIS
+===================================================== */
+
+/*
+IMPORTANTE:
+
+Las carpetas deben estar:
+
+17/
+18/
+19/
+20/
+21/
+
+al mismo nivel que index.html.
+
+El ?v=3 obliga al navegador a usar
+las PNG nuevas y evita la caché vieja.
+*/
 
 const ortomosaico = L.tileLayer(
 
-    "./{z}/{x}/{y}.png",
+    "./{z}/{x}/{y}.png?v=3",
 
     {
 
-        minZoom: 17,
+        minZoom:17,
 
-        maxZoom: 21,
+        maxZoom:22,
 
-        maxNativeZoom: 21,
+        minNativeZoom:17,
 
-        minNativeZoom: 17,
+        maxNativeZoom:21,
 
-        tms: false,
+        tms:false,
 
-        opacity: 1,
+        opacity:1,
 
-        attribution: "Ortomosaico Hacienda Nápoles"
+        bounds:limitesPangea,
+
+        noWrap:true,
+
+        keepBuffer:4,
+
+        updateWhenIdle:false,
+
+        attribution:"Ortomosaico Hacienda Nápoles"
 
     }
 
 ).addTo(mapa);
 
 
+/* =====================================================
+   POSICIÓN INICIAL
+===================================================== */
 
-// ======================================================
-// EXTENSIÓN DEL ORTOMOSAICO
-// ======================================================
+mapa.fitBounds(
 
-const limitesPangea = [
+    limitesPangea,
 
-    [5.922009730, -74.728636],
+    {
+        padding:[20,20]
+    }
 
-    [5.925396137, -74.724673180]
-
-];
-
-
-mapa.fitBounds(limitesPangea);
+);
 
 
+/* =====================================================
+   CONTROL DE CAPAS
+===================================================== */
 
-// ======================================================
-// CONTROL DE CAPAS
-// ======================================================
+const capasBase = {
+
+    "🗺️ OpenStreetMap":
+    osm
+
+};
+
+const capasSuperpuestas = {
+
+    "🛰️ Ortomosaico Pangea":
+    ortomosaico
+
+};
 
 L.control.layers(
 
-    {
+    capasBase,
 
-        "Mapa base": osm
-
-    },
+    capasSuperpuestas,
 
     {
-
-        "Ortomosaico Pangea": ortomosaico
-
-    },
-
-    {
-
-        collapsed: true
-
+        collapsed:true
     }
 
 ).addTo(mapa);
 
 
+/* =====================================================
+   ESCALA
+===================================================== */
 
-// ======================================================
-// ICONO DE PUNTOS
-// ======================================================
+L.control.scale({
+
+    metric:true,
+
+    imperial:false,
+
+    position:"bottomleft"
+
+}).addTo(mapa);
+
+
+/* =====================================================
+   ICONO PUNTOS
+===================================================== */
 
 const iconoHN = L.divIcon({
 
-    className: "",
+    className:"",
 
-    html: '<div class="punto-hn"></div>',
+    html:
+    '<div class="punto-hn"></div>',
 
-    iconSize: [22,22],
+    iconSize:[23,23],
 
-    iconAnchor: [11,11],
+    iconAnchor:[11,11],
 
-    popupAnchor: [0,-12]
+    popupAnchor:[0,-13]
 
 });
 
 
+/* =====================================================
+   ELEMENTOS HTML
+===================================================== */
 
-// ======================================================
-// LEER PROPIEDADES
-// ======================================================
+const lista =
+document.getElementById("lista");
 
-function propiedad(objeto, nombres) {
+const estado =
+document.getElementById("estado");
 
-    for(const nombre of nombres){
+const buscar =
+document.getElementById("buscar");
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let puntosCargados = [];
+
+let capaPuntos;
+
+
+/* =====================================================
+   LEER PROPIEDADES
+===================================================== */
+
+function obtenerPropiedad(
+
+    propiedades,
+
+    nombres
+
+){
+
+    for(
+
+        const nombre of nombres
+
+    ){
 
         if(
-            objeto &&
-            objeto[nombre] !== undefined &&
-            objeto[nombre] !== null
+
+            propiedades[nombre] !== undefined &&
+
+            propiedades[nombre] !== null
+
         ){
 
-            return String(objeto[nombre]);
+            return String(
+                propiedades[nombre]
+            );
 
         }
 
@@ -356,220 +517,440 @@ function propiedad(objeto, nombres) {
 }
 
 
+/* =====================================================
+   ICONO SEGÚN TIPO
+===================================================== */
 
-// ======================================================
-// CARGAR PUNTOS GEOJSON
-// ======================================================
+function emojiTipo(tipo){
 
-const lista =
-document.getElementById("lista");
+    const texto =
+    tipo.toLowerCase();
 
-const estado =
-document.getElementById("estado");
+    if(
+        texto.includes("museo")
+    ){
+        return "🏛️";
+    }
+
+    if(
+        texto.includes("atraccion")
+        ||
+        texto.includes("atracción")
+    ){
+        return "🎢";
+    }
+
+    if(
+        texto.includes("venta")
+    ){
+        return "🥤";
+    }
+
+    if(
+        texto.includes("baño")
+    ){
+        return "🚻";
+    }
+
+    if(
+        texto.includes("restaurante")
+    ){
+        return "🍔";
+    }
+
+    return "📍";
+
+}
 
 
-fetch("./puntos_pangea.geojson")
+/* =====================================================
+   CARGAR GEOJSON
+===================================================== */
 
-.then(respuesta => {
+fetch(
 
-    if(!respuesta.ok){
+    "./puntos_pangea.geojson?v=3"
 
-        throw new Error(
-            "No se encontró puntos_pangea.geojson"
-        );
+)
+
+.then(
+
+    respuesta => {
+
+        if(
+            !respuesta.ok
+        ){
+
+            throw new Error(
+                "No se pudo cargar puntos_pangea.geojson"
+            );
+
+        }
+
+        return respuesta.json();
 
     }
 
-    return respuesta.json();
+)
 
-})
+.then(
 
-.then(datos => {
+datos => {
 
 
-    const capaPuntos = L.geoJSON(
+    capaPuntos = L.geoJSON(
 
         datos,
 
         {
 
 
-        pointToLayer:
-        function(feature, latlng){
+            pointToLayer:
+            function(
+                feature,
+                latlng
+            ){
 
-            return L.marker(
+                return L.marker(
 
-                latlng,
-
-                {
-
-                    icon: iconoHN
-
-                }
-
-            );
-
-        },
-
-
-        onEachFeature:
-        function(feature, layer){
-
-
-            const p =
-            feature.properties || {};
-
-
-            const nombre =
-
-            propiedad(
-                p,
-                [
-                    "Nombre",
-                    "nombre",
-                    "NAME",
-                    "name"
-                ]
-            )
-
-            || "Punto de interés";
-
-
-            const tipo =
-
-            propiedad(
-                p,
-                [
-                    "Tipo",
-                    "tipo",
-                    "TYPE",
-                    "type"
-                ]
-            );
-
-
-            const descripcion =
-
-            propiedad(
-                p,
-                [
-                    "Descripcion",
-                    "Descripción",
-                    "descripcion",
-                    "descripción"
-                ]
-            );
-
-
-            let contenido =
-
-            "<b>" +
-            nombre +
-            "</b>";
-
-
-            if(tipo){
-
-                contenido +=
-
-                "<br>" +
-                tipo;
-
-            }
-
-
-            if(descripcion){
-
-                contenido +=
-
-                "<br><br>" +
-                descripcion;
-
-            }
-
-
-            layer.bindPopup(
-                contenido
-            );
-
-
-
-            // BOTÓN LATERAL
-
-            const boton =
-
-            document.createElement(
-                "button"
-            );
-
-
-            boton.className =
-            "boton-punto";
-
-
-            boton.innerHTML =
-            "📍 " + nombre;
-
-
-            boton.onclick =
-            function(){
-
-
-                mapa.flyTo(
-
-                    layer.getLatLng(),
-
-                    20,
+                    latlng,
 
                     {
 
-                        duration: 0.8
+                        icon:iconoHN
+
+                    }
+
+                );
+
+            },
+
+
+            onEachFeature:
+            function(
+                feature,
+                layer
+            ){
+
+
+                const p =
+                feature.properties || {};
+
+
+                const nombre =
+                obtenerPropiedad(
+
+                    p,
+
+                    [
+                        "Nombre",
+                        "nombre",
+                        "NAME",
+                        "name"
+                    ]
+
+                )
+
+                ||
+                "Punto de interés";
+
+
+                const tipo =
+                obtenerPropiedad(
+
+                    p,
+
+                    [
+                        "Tipo",
+                        "tipo",
+                        "TYPE",
+                        "type"
+                    ]
+
+                );
+
+
+                const descripcion =
+                obtenerPropiedad(
+
+                    p,
+
+                    [
+                        "descripcion",
+                        "Descripcion",
+                        "Descripción",
+                        "descripción"
+                    ]
+
+                );
+
+
+                const coordenadas =
+                layer.getLatLng();
+
+
+                const emoji =
+                emojiTipo(tipo);
+
+
+                /* =============================
+                   POPUP
+                ============================= */
+
+                let popup =
+
+                '<div class="popup-titulo">' +
+
+                emoji +
+
+                " " +
+
+                nombre +
+
+                "</div>";
+
+
+                if(tipo){
+
+                    popup +=
+
+                    '<div class="popup-tipo">' +
+
+                    tipo +
+
+                    "</div>";
+
+                }
+
+
+                if(descripcion){
+
+                    popup +=
+
+                    '<div class="popup-descripcion">' +
+
+                    descripcion +
+
+                    "</div>";
+
+                }
+
+
+                popup +=
+
+                '<a class="popup-boton" ' +
+
+                'target="_blank" ' +
+
+                'href="https://www.google.com/maps/dir/?api=1&destination=' +
+
+                coordenadas.lat +
+
+                "," +
+
+                coordenadas.lng +
+
+                '">' +
+
+                "🧭 Cómo llegar" +
+
+                "</a>";
+
+
+                layer.bindPopup(
+
+                    popup,
+
+                    {
+
+                        maxWidth:260
 
                     }
 
                 );
 
 
-                layer.openPopup();
+                /* =============================
+                   BOTÓN PANEL
+                ============================= */
 
-            };
+                const boton =
+                document.createElement(
+                    "button"
+                );
 
 
-            lista.appendChild(
-                boton
-            );
+                boton.className =
+                "boton-punto";
+
+
+                boton.dataset.nombre =
+                nombre.toLowerCase();
+
+
+                boton.innerHTML =
+
+                emoji +
+
+                " " +
+
+                nombre;
+
+
+                boton.onclick =
+                function(){
+
+
+                    mapa.flyTo(
+
+                        layer.getLatLng(),
+
+                        20,
+
+                        {
+
+                            duration:.8
+
+                        }
+
+                    );
+
+
+                    setTimeout(
+
+                        function(){
+
+                            layer.openPopup();
+
+                        },
+
+                        500
+
+                    );
+
+                };
+
+
+                lista.appendChild(
+                    boton
+                );
+
+
+                puntosCargados.push({
+
+                    nombre:nombre,
+
+                    layer:layer,
+
+                    boton:boton
+
+                });
+
+
+            }
 
 
         }
 
 
-    }
-
     ).addTo(mapa);
 
 
+    capasSuperpuestas[
+        "📍 Puntos de interés"
+    ] = capaPuntos;
+
+
     estado.innerHTML =
-    "Mapa listo · " +
+
+    "✅ " +
+
     datos.features.length +
+
     " puntos cargados";
 
 
-})
+}
 
-.catch(error => {
+)
 
-    console.error(error);
+.catch(
+
+error => {
+
+
+    console.error(
+        error
+    );
+
 
     estado.innerHTML =
-    "⚠ No fue posible cargar los puntos.";
 
-});
-
+    "⚠️ No fue posible cargar los puntos";
 
 
-// ======================================================
-// UBICACIÓN GPS
-// ======================================================
+}
+
+);
+
+
+/* =====================================================
+   BUSCADOR
+===================================================== */
+
+buscar.addEventListener(
+
+"input",
+
+function(){
+
+
+    const texto =
+
+    this.value
+    .toLowerCase()
+    .trim();
+
+
+    puntosCargados.forEach(
+
+        punto => {
+
+
+            if(
+
+                punto.nombre
+                .toLowerCase()
+                .includes(texto)
+
+            ){
+
+                punto.boton.style.display =
+                "block";
+
+            }
+
+            else{
+
+                punto.boton.style.display =
+                "none";
+
+            }
+
+
+        }
+
+    );
+
+
+}
+
+);
+
+
+/* =====================================================
+   GPS
+===================================================== */
 
 let marcadorUsuario = null;
 
@@ -586,11 +967,13 @@ function(){
 
 
     if(
+
         !navigator.geolocation
+
     ){
 
         alert(
-            "Este dispositivo no permite obtener la ubicación."
+            "Este dispositivo no permite obtener ubicación."
         );
 
         return;
@@ -599,32 +982,36 @@ function(){
 
 
     estado.innerHTML =
-    "Buscando ubicación...";
+
+    "📡 Buscando ubicación...";
 
 
     navigator.geolocation.getCurrentPosition(
 
 
-        function(posicion){
+        function(
+            posicion
+        ){
 
 
             const lat =
+
             posicion.coords.latitude;
 
 
             const lon =
+
             posicion.coords.longitude;
 
 
             const precision =
-            posicion.coords.accuracy;
 
+            posicion.coords.accuracy;
 
 
             if(
                 marcadorUsuario
             ){
-
 
                 marcadorUsuario
                 .setLatLng(
@@ -643,10 +1030,9 @@ function(){
                     precision
                 );
 
-
             }
 
-            else {
+            else{
 
 
                 marcadorUsuario =
@@ -657,15 +1043,15 @@ function(){
 
                     {
 
-                        radius: 8,
+                        radius:8,
 
-                        color: "white",
+                        color:"white",
 
-                        weight: 3,
+                        weight:3,
 
-                        fillColor: "#1976d2",
+                        fillColor:"#1976d2",
 
-                        fillOpacity: 1
+                        fillOpacity:1
 
                     }
 
@@ -676,7 +1062,6 @@ function(){
                 .bindPopup(
                     "📍 Usted está aquí"
                 );
-
 
 
                 circuloPrecision =
@@ -690,16 +1075,19 @@ function(){
                         radius:
                         precision,
 
-                        weight: 1,
+                        weight:1,
 
-                        fillOpacity: 0.08
+                        color:"#1976d2",
+
+                        fillColor:"#1976d2",
+
+                        fillOpacity:.08
 
                     }
 
                 )
 
                 .addTo(mapa);
-
 
             }
 
@@ -719,13 +1107,15 @@ function(){
 
             estado.innerHTML =
 
-            "Ubicación encontrada · precisión aprox. " +
+            "📍 Precisión aproximada: " +
 
             Math.round(
                 precision
             )
 
-            + " m";
+            +
+
+            " m";
 
 
         },
@@ -734,15 +1124,20 @@ function(){
         function(error){
 
 
-            console.error(error);
+            console.error(
+                error
+            );
 
 
             estado.innerHTML =
-            "No fue posible obtener tu ubicación.";
+
+            "⚠️ No fue posible obtener ubicación";
 
 
             alert(
+
                 "Autoriza el uso de ubicación en el navegador."
+
             );
 
 
@@ -751,11 +1146,11 @@ function(){
 
         {
 
-            enableHighAccuracy: true,
+            enableHighAccuracy:true,
 
-            timeout: 15000,
+            timeout:15000,
 
-            maximumAge: 0
+            maximumAge:0
 
         }
 
@@ -768,29 +1163,30 @@ function(){
 );
 
 
-// ======================================================
-// ERROR EN TESELAS
-// ======================================================
+/* =====================================================
+   DIAGNÓSTICO TESELAS
+===================================================== */
 
 ortomosaico.on(
 
-    "tileerror",
+"tileerror",
 
-    function(error){
+function(error){
 
-        console.log(
-            "Tesela no encontrada:",
-            error.tile.src
-        );
+    console.log(
 
-    }
+        "Tesela no encontrada:",
+
+        error.tile.src
+
+    );
+
+}
 
 );
 
 
 </script>
 
-
 </body>
-
 </html>
