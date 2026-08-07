@@ -1,1395 +1,653 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
 <title>HN SmartMap - Mundo Pangea</title>
 
-<link
-rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-
-html,
-body{
-    height:100%;
-    margin:0;
-    font-family:Arial,Helvetica,sans-serif;
-}
-
-#map{
-    height:100%;
-    width:100%;
-}
-
-/* =========================
-   PANEL PRINCIPAL
-========================= */
+html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif}
+#map{height:100%;width:100%}
 
 .panel{
-    position:absolute;
-    top:12px;
-    left:55px;
-    z-index:1000;
-
-    width:290px;
-    max-height:calc(100vh - 40px);
-
-    padding:14px;
-
-    background:rgba(255,255,255,.96);
-
-    border-radius:12px;
-
-    box-shadow:0 4px 18px rgba(0,0,0,.28);
-
-    overflow-y:auto;
+  position:absolute;top:12px;left:55px;z-index:1000;
+  width:300px;max-height:calc(100vh - 40px);overflow-y:auto;
+  padding:14px;background:rgba(255,255,255,.97);border-radius:12px;
+  box-shadow:0 4px 18px rgba(0,0,0,.28)
 }
-
-.titulo{
-    font-size:20px;
-    font-weight:bold;
-}
-
-.subtitulo{
-    font-size:13px;
-    color:#666;
-    margin-top:2px;
-    margin-bottom:12px;
-}
-
-/* =========================
-   BUSCADOR
-========================= */
-
+.titulo{font-size:20px;font-weight:700}
+.subtitulo{font-size:13px;color:#666;margin:2px 0 8px}
+.horario{font-size:12px;font-weight:700;margin-bottom:10px}
 #buscar{
-    width:100%;
-    box-sizing:border-box;
-
-    padding:9px;
-
-    margin-bottom:10px;
-
-    border:1px solid #ccc;
-    border-radius:7px;
-
-    font-size:13px;
+  width:100%;box-sizing:border-box;padding:9px;margin-bottom:10px;
+  border:1px solid #ccc;border-radius:7px;font-size:13px
 }
-
-/* =========================
-   BOTONES DE PUNTOS
-========================= */
-
 .boton-punto{
-    width:100%;
-
-    margin-bottom:6px;
-
-    padding:9px;
-
-    border:1px solid #ddd;
-
-    border-radius:7px;
-
-    background:white;
-
-    cursor:pointer;
-
-    text-align:left;
-
-    font-size:13px;
+  width:100%;margin-bottom:6px;padding:9px;border:1px solid #ddd;
+  border-radius:7px;background:white;cursor:pointer;text-align:left;font-size:13px
 }
-
-.boton-punto:hover{
-    background:#f2f2f2;
+.boton-punto:hover{background:#f2f2f2}
+.accion{
+  width:100%;margin-top:8px;padding:10px;border:0;border-radius:7px;
+  color:white;font-weight:700;cursor:pointer
 }
-
-/* =========================
-   BOTÓN GPS
-========================= */
-
-#ubicacion{
-    width:100%;
-
-    margin-top:10px;
-
-    padding:10px;
-
-    border:0;
-
-    border-radius:7px;
-
-    background:#26734d;
-
-    color:white;
-
-    font-weight:bold;
-
-    cursor:pointer;
+#ubicacion{background:#26734d}
+#modoPrueba{background:#546e7a}
+#limpiarRuta{background:#777;display:none}
+.estado{margin-top:9px;font-size:12px;color:#555;line-height:1.35}
+.ruta-info{
+  margin-top:10px;padding:10px;border-radius:8px;background:#eef5ff;
+  border:1px solid #c8dbf6;font-size:13px;display:none
 }
-
-#ubicacion:hover{
-    background:#1d5c3d;
-}
-
-.estado{
-    margin-top:9px;
-
-    font-size:12px;
-
-    color:#666;
-}
-
-/* =========================
-   MARCADORES
-========================= */
-
 .punto-hn{
-    width:17px;
-    height:17px;
-
-    background:#e53935;
-
-    border:3px solid white;
-
-    border-radius:50%;
-
-    box-shadow:0 2px 6px rgba(0,0,0,.55);
+  width:17px;height:17px;background:#e53935;border:3px solid white;
+  border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.55)
 }
-
-/* =========================
-   POPUP
-========================= */
-
-.popup-titulo{
-    font-size:16px;
-    font-weight:bold;
-    margin-bottom:5px;
-}
-
-.popup-tipo{
-    font-size:12px;
-    color:#666;
-    margin-bottom:8px;
-}
-
-.popup-descripcion{
-    font-size:13px;
-    margin-bottom:10px;
-}
-
+.popup-titulo{font-size:16px;font-weight:700;margin-bottom:5px}
+.popup-tipo{font-size:12px;color:#666;margin-bottom:8px}
+.popup-descripcion{font-size:13px;margin-bottom:10px}
 .popup-boton{
-    display:block;
-    box-sizing:border-box;
-
-    padding:8px 10px;
-
-    background:#26734d;
-
-    color:white !important;
-
-    text-decoration:none;
-
-    border-radius:6px;
-
-    text-align:center;
-
-    font-weight:bold;
+  display:block;box-sizing:border-box;width:100%;padding:9px 10px;
+  background:#26734d;color:white;border:0;border-radius:6px;
+  text-align:center;font-weight:700;cursor:pointer
 }
-
-/* =========================
-   CELULAR
-========================= */
 
 @media(max-width:600px){
-
-    .panel{
-        left:45px;
-        top:8px;
-
-        width:235px;
-
-        max-height:48vh;
-
-        padding:11px;
-    }
-
-    .titulo{
-        font-size:17px;
-    }
-
+  .panel{left:45px;top:8px;width:245px;max-height:52vh;padding:11px}
+  .titulo{font-size:17px}
 }
-
 </style>
-
 </head>
 
 <body>
-
 <div class="panel">
+  <div class="titulo">HN SmartMap</div>
+  <div class="subtitulo">Mundo Pangea</div>
+  <div id="horarioPangea" class="horario"></div>
 
-    <div class="titulo">
-        HN SmartMap
-    </div>
+  <input id="buscar" type="text" placeholder="🔍 Buscar punto...">
+  <div id="lista"></div>
 
-    <div class="subtitulo">Mundo Pangea</div>
+  <button id="ubicacion" class="accion">📍 Mi ubicación</button>
+  <button id="modoPrueba" class="accion">🧪 Probar desde entrada Pangea</button>
+  <button id="limpiarRuta" class="accion">✖ Limpiar ruta</button>
 
-    <div id="horarioPangea" class="estado" style="margin-top:0;margin-bottom:10px;font-weight:bold;"></div>
-
-    <input
-        id="buscar"
-        type="text"
-        placeholder="🔍 Buscar punto..."
-    >
-
-    <div id="lista"></div>
-
-    <button id="ubicacion">
-        📍 Mi ubicación
-    </button>
-
-    <div
-        class="estado"
-        id="estado"
-    >
-        Cargando...
-    </div>
-
+  <div id="rutaInfo" class="ruta-info"></div>
+  <div id="estado" class="estado">Cargando mapa...</div>
 </div>
 
 <div id="map"></div>
 
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-
 <script>
-
 /* =====================================================
-   MAPA
+   CONFIGURACIÓN
 ===================================================== */
+const VERSION = "7";
+const VELOCIDAD_CAMINANDO_M_MIN = 75;
+const TOLERANCIA_UNION_RED_M = 8;
+const MAX_DISTANCIA_ORIGEN_RED_M = 150;
 
 const mapa = L.map("map",{
-
-    minZoom:16,
-    maxZoom:22,
-
-    zoomControl:true,
-
-    preferCanvas:true
-
+  minZoom:16,
+  maxZoom:22,
+  zoomControl:true,
+  preferCanvas:true
 });
-
-
-/* =====================================================
-   MAPA BASE
-===================================================== */
 
 const osm = L.tileLayer(
-
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-    {
-
-        minZoom:1,
-
-        maxZoom:22,
-
-        maxNativeZoom:19,
-
-        attribution:"&copy; OpenStreetMap"
-
-    }
-
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {minZoom:1,maxZoom:22,maxNativeZoom:19,attribution:"&copy; OpenStreetMap"}
 ).addTo(mapa);
-
-
-/* =====================================================
-   LÍMITES PANGEA
-===================================================== */
 
 const limitesPangea = L.latLngBounds(
-
-    [5.922009730,-74.728636],
-
-    [5.925396137,-74.724673180]
-
+  [5.922009730,-74.728636],
+  [5.925396137,-74.724673180]
 );
-
-
-/* =====================================================
-   ORTOMOSAICO QGIS
-===================================================== */
-
-/*
-IMPORTANTE:
-
-Las carpetas deben estar:
-
-17/
-18/
-19/
-20/
-21/
-
-al mismo nivel que index.html.
-
-El ?v=3 obliga al navegador a usar
-las PNG nuevas y evita la caché vieja.
-*/
 
 const ortomosaico = L.tileLayer(
-
-    "./{z}/{x}/{y}.png?v=3",
-
-    {
-
-        minZoom:17,
-
-        maxZoom:22,
-
-        minNativeZoom:17,
-
-        maxNativeZoom:21,
-
-        tms:false,
-
-        opacity:1,
-
-        bounds:limitesPangea,
-
-        noWrap:true,
-
-        keepBuffer:4,
-
-        updateWhenIdle:false,
-
-        attribution:"Ortomosaico Hacienda Nápoles"
-
-    }
-
+  "./{z}/{x}/{y}.png?v=" + VERSION,
+  {
+    minZoom:17,maxZoom:22,minNativeZoom:17,maxNativeZoom:21,
+    tms:false,opacity:1,bounds:limitesPangea,noWrap:true,
+    keepBuffer:4,updateWhenIdle:false,
+    attribution:"Ortomosaico Hacienda Nápoles"
+  }
 ).addTo(mapa);
 
+mapa.fitBounds(limitesPangea,{padding:[20,20]});
+
+const capasBase = {"🗺️ OpenStreetMap":osm};
+const capasSuperpuestas = {"🛰️ Ortomosaico Pangea":ortomosaico};
+L.control.layers(capasBase,capasSuperpuestas,{collapsed:true}).addTo(mapa);
+L.control.scale({metric:true,imperial:false,position:"bottomleft"}).addTo(mapa);
 
 /* =====================================================
-   POSICIÓN INICIAL
+   UI
 ===================================================== */
-
-mapa.fitBounds(
-
-    limitesPangea,
-
-    {
-        padding:[20,20]
-    }
-
-);
-
-
-/* =====================================================
-   CONTROL DE CAPAS
-===================================================== */
-
-const capasBase = {
-
-    "🗺️ OpenStreetMap":
-    osm
-
-};
-
-const capasSuperpuestas = {
-
-    "🛰️ Ortomosaico Pangea":
-    ortomosaico
-
-};
-
-L.control.layers(
-
-    capasBase,
-
-    capasSuperpuestas,
-
-    {
-        collapsed:true
-    }
-
-).addTo(mapa);
-
-
-/* =====================================================
-   ESCALA
-===================================================== */
-
-L.control.scale({
-
-    metric:true,
-
-    imperial:false,
-
-    position:"bottomleft"
-
-}).addTo(mapa);
-
-
-/* =====================================================
-   ICONO PUNTOS
-===================================================== */
-
-const iconoHN = L.divIcon({
-
-    className:"",
-
-    html:
-    '<div class="punto-hn"></div>',
-
-    iconSize:[23,23],
-
-    iconAnchor:[11,11],
-
-    popupAnchor:[0,-13]
-
-});
-
-
-/* =====================================================
-   ELEMENTOS HTML
-===================================================== */
-
-const lista =
-document.getElementById("lista");
-
-const estado =
-document.getElementById("estado");
-
-const buscar =
-document.getElementById("buscar");
-
+const lista = document.getElementById("lista");
+const estado = document.getElementById("estado");
+const buscar = document.getElementById("buscar");
 const horarioPangea = document.getElementById("horarioPangea");
+const rutaInfo = document.getElementById("rutaInfo");
+const btnLimpiar = document.getElementById("limpiarRuta");
 
+function actualizarHorarioPangea(){
+  const ahora = new Date();
+  const dia = ahora.getDay(); // domingo=0
+  const hora = ahora.getHours() + ahora.getMinutes()/60;
+  const abierto = [0,4,5,6].includes(dia) && hora >= 10 && hora < 16;
+
+  horarioPangea.textContent = abierto
+    ? "🟢 Abierto · Jue–Dom · 10:00 a. m. – 4:00 p. m."
+    : "🔴 Cerrado · Jue–Dom · 10:00 a. m. – 4:00 p. m.";
+}
+actualizarHorarioPangea();
 
 /* =====================================================
    VARIABLES
 ===================================================== */
-
 let puntosCargados = [];
-let capaPuntos;
+let capaPuntos = null;
 let marcadorUsuario = null;
 let circuloPrecision = null;
 let rutaActual = null;
 let nodosRed = [];
+let redLista = false;
+let contadorDestinos = 0;
+
 window.destinosHN = {};
 
-function actualizarHorarioPangea(){
-    const ahora = new Date();
-    const dia = ahora.getDay(); // 0 domingo
-    const hora = ahora.getHours() + ahora.getMinutes()/60;
-    const abierto = [0,4,5,6].includes(dia) && hora >= 10 && hora < 16;
-    horarioPangea.innerHTML = abierto
-        ? "🟢 Abierto · Jueves a domingo · 10:00 a. m. – 4:00 p. m."
-        : "🔴 Cerrado · Jueves a domingo · 10:00 a. m. – 4:00 p. m.";
-}
-actualizarHorarioPangea();
-
-
 /* =====================================================
-   LEER PROPIEDADES
+   UTILIDADES
 ===================================================== */
-
-function obtenerPropiedad(
-
-    propiedades,
-
-    nombres
-
-){
-
-    for(
-
-        const nombre of nombres
-
-    ){
-
-        if(
-
-            propiedades[nombre] !== undefined &&
-
-            propiedades[nombre] !== null
-
-        ){
-
-            return String(
-                propiedades[nombre]
-            );
-
-        }
-
+function obtenerPropiedad(propiedades,nombres){
+  for(const nombre of nombres){
+    if(propiedades[nombre] !== undefined && propiedades[nombre] !== null){
+      return String(propiedades[nombre]);
     }
-
-    return "";
-
+  }
+  return "";
 }
-
-
-/* =====================================================
-   ICONO SEGÚN TIPO
-===================================================== */
 
 function emojiTipo(tipo){
-
-    const texto =
-    tipo.toLowerCase();
-
-    if(
-        texto.includes("museo")
-    ){
-        return "🏛️";
-    }
-
-    if(
-        texto.includes("atraccion")
-        ||
-        texto.includes("atracción")
-    ){
-        return "🎢";
-    }
-
-    if(
-        texto.includes("venta")
-    ){
-        return "🥤";
-    }
-
-    if(
-        texto.includes("baño")
-    ){
-        return "🚻";
-    }
-
-    if(
-        texto.includes("restaurante")
-    ){
-        return "🍔";
-    }
-
-    return "📍";
-
+  const t = (tipo || "").toLowerCase();
+  if(t.includes("museo")) return "🏛️";
+  if(t.includes("atraccion") || t.includes("atracción")) return "🎢";
+  if(t.includes("venta")) return "🥤";
+  if(t.includes("baño")) return "🚻";
+  if(t.includes("restaurante")) return "🍔";
+  return "📍";
 }
 
+function distanciaMetros(a,b){
+  const R = 6371000;
+  const lat1 = a.lat*Math.PI/180;
+  const lat2 = b.lat*Math.PI/180;
+  const dLat = (b.lat-a.lat)*Math.PI/180;
+  const dLon = (b.lng-a.lng)*Math.PI/180;
+
+  const h =
+    Math.sin(dLat/2)*Math.sin(dLat/2) +
+    Math.cos(lat1)*Math.cos(lat2)*
+    Math.sin(dLon/2)*Math.sin(dLon/2);
+
+  return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
+}
 
 /* =====================================================
-   CARGAR GEOJSON
+   RED DE SENDEROS
 ===================================================== */
+function obtenerOCrearNodo(punto){
+  for(const nodo of nodosRed){
+    if(distanciaMetros(nodo,punto) <= 1.5) return nodo;
+  }
 
-fetch(
+  const nuevo = {
+    id:nodosRed.length,
+    lat:punto.lat,
+    lng:punto.lng,
+    conexiones:[]
+  };
 
-    "./puntos_pangea.geojson?v=3"
+  nodosRed.push(nuevo);
+  return nuevo;
+}
 
-)
+function estanConectados(a,b){
+  return a.conexiones.some(c => c.nodo.id === b.id);
+}
 
-.then(
+function conectarNodos(a,b){
+  if(estanConectados(a,b)) return;
+  const d = distanciaMetros(a,b);
+  a.conexiones.push({nodo:b,distancia:d});
+  b.conexiones.push({nodo:a,distancia:d});
+}
 
-    respuesta => {
+function construirRed(datos){
+  nodosRed = [];
 
-        if(
-            !respuesta.ok
-        ){
+  for(const feature of datos.features || []){
+    if(!feature.geometry || feature.geometry.type !== "LineString") continue;
 
-            throw new Error(
-                "No se pudo cargar puntos_pangea.geojson"
-            );
+    let anterior = null;
 
-        }
+    for(const c of feature.geometry.coordinates){
+      const actual = obtenerOCrearNodo({lat:c[1],lng:c[0]});
+      if(anterior) conectarNodos(anterior,actual);
+      anterior = actual;
+    }
+  }
 
-        return respuesta.json();
+  // Une pequeños espacios dejados entre líneas al digitalizar en QGIS.
+  for(let i=0;i<nodosRed.length;i++){
+    for(let j=i+1;j<nodosRed.length;j++){
+      const a = nodosRed[i];
+      const b = nodosRed[j];
 
+      if(distanciaMetros(a,b) <= TOLERANCIA_UNION_RED_M){
+        conectarNodos(a,b);
+      }
+    }
+  }
+
+  redLista = nodosRed.length > 0;
+  estado.textContent = redLista
+    ? "✅ Mapa y red de senderos listos"
+    : "⚠️ La red de senderos está vacía";
+
+  console.log("Red HN lista:",nodosRed.length,"nodos");
+}
+
+function nodoMasCercano(punto){
+  let mejor = null;
+  let dMejor = Infinity;
+
+  for(const nodo of nodosRed){
+    const d = distanciaMetros(punto,nodo);
+    if(d < dMejor){
+      dMejor = d;
+      mejor = nodo;
+    }
+  }
+
+  return {nodo:mejor,distancia:dMejor};
+}
+
+/* =====================================================
+   DIJKSTRA - CAMINO MÁS CORTO
+===================================================== */
+function calcularCamino(inicio,fin){
+  const dist = {};
+  const prev = {};
+  const pendientes = new Set();
+
+  for(const n of nodosRed){
+    dist[n.id] = Infinity;
+    pendientes.add(n.id);
+  }
+
+  dist[inicio.id] = 0;
+
+  while(pendientes.size){
+    let actual = null;
+    let mejor = Infinity;
+
+    for(const id of pendientes){
+      if(dist[id] < mejor){
+        mejor = dist[id];
+        actual = id;
+      }
     }
 
-)
+    if(actual === null) break;
+    if(actual === fin.id) break;
 
-.then(
+    pendientes.delete(actual);
 
-datos => {
+    for(const conexion of nodosRed[actual].conexiones){
+      const vecino = conexion.nodo.id;
+      if(!pendientes.has(vecino)) continue;
 
+      const nd = dist[actual] + conexion.distancia;
 
-    capaPuntos = L.geoJSON(
+      if(nd < dist[vecino]){
+        dist[vecino] = nd;
+        prev[vecino] = actual;
+      }
+    }
+  }
 
-        datos,
+  if(dist[fin.id] === Infinity) return null;
 
-        {
+  const camino = [];
+  let actual = fin.id;
 
+  while(actual !== undefined){
+    camino.unshift(nodosRed[actual]);
 
-            pointToLayer:
-            function(
-                feature,
-                latlng
-            ){
+    if(actual === inicio.id) break;
+    actual = prev[actual];
+  }
 
-                return L.marker(
-
-                    latlng,
-
-                    {
-
-                        icon:iconoHN
-
-                    }
-
-                );
-
-            },
-
-
-            onEachFeature:
-            function(
-                feature,
-                layer
-            ){
-
-
-                const p =
-                feature.properties || {};
-
-
-                const nombre =
-                obtenerPropiedad(
-
-                    p,
-
-                    [
-                        "Nombre",
-                        "nombre",
-                        "NAME",
-                        "name"
-                    ]
-
-                )
-
-                ||
-                "Punto de interés";
-
-
-                const tipo =
-                obtenerPropiedad(
-
-                    p,
-
-                    [
-                        "Tipo",
-                        "tipo",
-                        "TYPE",
-                        "type"
-                    ]
-
-                );
-
-
-                const descripcion =
-                obtenerPropiedad(
-
-                    p,
-
-                    [
-                        "descripcion",
-                        "Descripcion",
-                        "Descripción",
-                        "descripción"
-                    ]
-
-                );
-
-
-                const coordenadas =
-                layer.getLatLng();
-
-
-                const emoji =
-                emojiTipo(tipo);
-
-                window.destinosHN[nombre] = { layer:layer, feature:feature };
-
-
-                /* =============================
-                   POPUP
-                ============================= */
-
-                let popup =
-
-                '<div class="popup-titulo">' +
-
-                emoji +
-
-                " " +
-
-                nombre +
-
-                "</div>";
-
-
-                if(tipo){
-
-                    popup +=
-
-                    '<div class="popup-tipo">' +
-
-                    tipo +
-
-                    "</div>";
-
-                }
-
-
-                if(descripcion){
-
-                    popup +=
-
-                    '<div class="popup-descripcion">' +
-
-                    descripcion +
-
-                    "</div>";
-
-                }
-
-
-                popup +=
-                '<button class="popup-boton" ' +
-                'style="border:0;width:100%;cursor:pointer;" ' +
-                'onclick="navegarA(window.destinosHN[' + JSON.stringify(nombre) + '].layer,' + JSON.stringify(nombre) + ')">' +
-                "🧭 Cómo llegar" +
-                "</button>";
-
-
-                layer.bindPopup(
-
-                    popup,
-
-                    {
-
-                        maxWidth:260
-
-                    }
-
-                );
-
-
-                /* =============================
-                   BOTÓN PANEL
-                ============================= */
-
-                const boton =
-                document.createElement(
-                    "button"
-                );
-
-
-                boton.className =
-                "boton-punto";
-
-
-                boton.dataset.nombre =
-                nombre.toLowerCase();
-
-
-                boton.innerHTML =
-
-                emoji +
-
-                " " +
-
-                nombre;
-
-
-                boton.onclick =
-                function(){
-
-
-                    mapa.flyTo(
-
-                        layer.getLatLng(),
-
-                        20,
-
-                        {
-
-                            duration:.8
-
-                        }
-
-                    );
-
-
-                    setTimeout(
-
-                        function(){
-
-                            layer.openPopup();
-
-                        },
-
-                        500
-
-                    );
-
-                };
-
-
-                lista.appendChild(
-                    boton
-                );
-
-
-                puntosCargados.push({
-
-                    nombre:nombre,
-
-                    layer:layer,
-
-                    boton:boton
-
-                });
-
-
-            }
-
-
-        }
-
-
-    ).addTo(mapa);
-
-
-    capasSuperpuestas[
-        "📍 Puntos de interés"
-    ] = capaPuntos;
-
-
-    estado.innerHTML =
-
-    "✅ " +
-
-    datos.features.length +
-
-    " puntos cargados";
-
-
+  return {camino:camino,distancia:dist[fin.id]};
 }
 
-)
+/* =====================================================
+   DIBUJAR RUTA INTERNA
+===================================================== */
+function navegarA(layer,nombre){
+  mapa.closePopup();
 
-.catch(
+  if(!redLista){
+    alert("La red de senderos todavía no ha cargado.");
+    return;
+  }
 
-error => {
+  if(!marcadorUsuario){
+    alert("Primero pulsa 📍 Mi ubicación o usa 🧪 Probar desde entrada Pangea.");
+    return;
+  }
 
+  const origen = marcadorUsuario.getLatLng();
+  const destino = layer.getLatLng();
 
-    console.error(
-        error
+  const inicio = nodoMasCercano(origen);
+  const fin = nodoMasCercano(destino);
+
+  if(!inicio.nodo || !fin.nodo){
+    alert("No fue posible conectar el origen o destino con la red.");
+    return;
+  }
+
+  if(inicio.distancia > MAX_DISTANCIA_ORIGEN_RED_M){
+    alert(
+      "Tu ubicación está fuera de la red que hemos dibujado por ahora. " +
+      "Para probar Pangea, pulsa 🧪 Probar desde entrada Pangea. " +
+      "Cuando dibujemos los senderos del resto del parque, funcionará desde Cataratas, Congo y demás zonas."
     );
+    return;
+  }
 
+  const resultado = calcularCamino(inicio.nodo,fin.nodo);
 
-    estado.innerHTML =
+  if(!resultado){
+    alert("No encontramos una ruta conectada hasta este destino.");
+    return;
+  }
 
-    "⚠️ No fue posible cargar los puntos";
+  if(rutaActual) mapa.removeLayer(rutaActual);
 
+  const puntosRuta = [
+    origen,
+    ...resultado.camino.map(n => [n.lat,n.lng]),
+    destino
+  ];
 
+  rutaActual = L.polyline(
+    puntosRuta,
+    {
+      color:"#1976d2",
+      weight:7,
+      opacity:.95,
+      lineJoin:"round",
+      lineCap:"round"
+    }
+  ).addTo(mapa);
+
+  const distanciaTotal =
+    resultado.distancia +
+    inicio.distancia +
+    fin.distancia;
+
+  const minutos = Math.max(
+    1,
+    Math.round(distanciaTotal/VELOCIDAD_CAMINANDO_M_MIN)
+  );
+
+  rutaInfo.style.display = "block";
+  rutaInfo.innerHTML =
+    "<b>🧭 " + nombre + "</b><br>" +
+    "📏 " + Math.round(distanciaTotal) + " m<br>" +
+    "🚶 " + minutos + " min caminando";
+
+  btnLimpiar.style.display = "block";
+
+  estado.textContent = "Ruta calculada sobre los senderos de Pangea";
+  mapa.fitBounds(rutaActual.getBounds(),{padding:[60,60]});
 }
 
-);
+function limpiarRuta(){
+  if(rutaActual){
+    mapa.removeLayer(rutaActual);
+    rutaActual = null;
+  }
+  rutaInfo.style.display = "none";
+  rutaInfo.innerHTML = "";
+  btnLimpiar.style.display = "none";
+}
 
+btnLimpiar.addEventListener("click",limpiarRuta);
+
+/* =====================================================
+   CARGAR PUNTOS
+===================================================== */
+const iconoHN = L.divIcon({
+  className:"",
+  html:'<div class="punto-hn"></div>',
+  iconSize:[23,23],
+  iconAnchor:[11,11],
+  popupAnchor:[0,-13]
+});
+
+fetch("./puntos_pangea.geojson?v=" + VERSION)
+.then(r => {
+  if(!r.ok) throw new Error("No se pudo cargar puntos_pangea.geojson");
+  return r.json();
+})
+.then(datos => {
+  capaPuntos = L.geoJSON(datos,{
+    pointToLayer:function(feature,latlng){
+      return L.marker(latlng,{icon:iconoHN});
+    },
+
+    onEachFeature:function(feature,layer){
+      const p = feature.properties || {};
+
+      const nombre =
+        obtenerPropiedad(p,["Nombre","nombre","NAME","name"]) ||
+        "Punto de interés";
+
+      const tipo =
+        obtenerPropiedad(p,["Tipo","tipo","TYPE","type"]);
+
+      const descripcion =
+        obtenerPropiedad(
+          p,
+          ["descripcion","Descripcion","Descripción","descripción"]
+        );
+
+      const emoji = emojiTipo(tipo);
+      const idDestino = "destino_" + (++contadorDestinos);
+
+      window.destinosHN[idDestino] = {
+        layer:layer,
+        feature:feature,
+        nombre:nombre
+      };
+
+      let popup =
+        '<div class="popup-titulo">' + emoji + " " + nombre + "</div>";
+
+      if(tipo){
+        popup += '<div class="popup-tipo">' + tipo + "</div>";
+      }
+
+      if(descripcion){
+        popup += '<div class="popup-descripcion">' + descripcion + "</div>";
+      }
+
+      popup +=
+        '<button class="popup-boton" ' +
+        'onclick="navegarA(window.destinosHN[\'' + idDestino + '\'].layer,' +
+        'window.destinosHN[\'' + idDestino + '\'].nombre)">' +
+        "🧭 Cómo llegar por el parque" +
+        "</button>";
+
+      layer.bindPopup(popup,{maxWidth:270});
+
+      const boton = document.createElement("button");
+      boton.className = "boton-punto";
+      boton.dataset.nombre = nombre.toLowerCase();
+      boton.innerHTML = emoji + " " + nombre;
+
+      boton.onclick = function(){
+        mapa.flyTo(layer.getLatLng(),20,{duration:.8});
+        setTimeout(() => layer.openPopup(),450);
+      };
+
+      lista.appendChild(boton);
+
+      puntosCargados.push({
+        nombre:nombre,
+        layer:layer,
+        boton:boton
+      });
+    }
+  }).addTo(mapa);
+
+  estado.textContent = "✅ " + datos.features.length + " puntos cargados";
+})
+.catch(error => {
+  console.error(error);
+  estado.textContent = "⚠️ No fue posible cargar los puntos";
+});
+
+/* =====================================================
+   CARGAR SENDEROS
+===================================================== */
+fetch("./senderos_pangea.geojson?v=" + VERSION)
+.then(r => {
+  if(!r.ok) throw new Error("No se encontró senderos_pangea.geojson");
+  return r.json();
+})
+.then(datos => construirRed(datos))
+.catch(error => {
+  console.error(error);
+  estado.textContent = "⚠️ No fue posible cargar senderos_pangea.geojson";
+});
 
 /* =====================================================
    BUSCADOR
 ===================================================== */
+buscar.addEventListener("input",function(){
+  const texto = this.value.toLowerCase().trim();
 
-buscar.addEventListener(
-
-"input",
-
-function(){
-
-
-    const texto =
-
-    this.value
-    .toLowerCase()
-    .trim();
-
-
-    puntosCargados.forEach(
-
-        punto => {
-
-
-            if(
-
-                punto.nombre
-                .toLowerCase()
-                .includes(texto)
-
-            ){
-
-                punto.boton.style.display =
-                "block";
-
-            }
-
-            else{
-
-                punto.boton.style.display =
-                "none";
-
-            }
-
-
-        }
-
-    );
-
-
-}
-
-);
-
+  puntosCargados.forEach(punto => {
+    punto.boton.style.display =
+      punto.nombre.toLowerCase().includes(texto) ? "block" : "none";
+  });
+});
 
 /* =====================================================
    GPS
 ===================================================== */
+function ponerUbicacion(lat,lon,precision=10,texto="📍 Usted está aquí"){
+  if(marcadorUsuario){
+    marcadorUsuario.setLatLng([lat,lon]);
 
-
-document
-.getElementById("ubicacion")
-.addEventListener(
-
-"click",
-
-function(){
-
-
-    if(
-
-        !navigator.geolocation
-
-    ){
-
-        alert(
-            "Este dispositivo no permite obtener ubicación."
-        );
-
-        return;
-
+    if(circuloPrecision){
+      circuloPrecision.setLatLng([lat,lon]);
+      circuloPrecision.setRadius(precision);
     }
-
-
-    estado.innerHTML =
-
-    "📡 Buscando ubicación...";
-
-
-    navigator.geolocation.getCurrentPosition(
-
-
-        function(
-            posicion
-        ){
-
-
-            const lat =
-
-            posicion.coords.latitude;
-
-
-            const lon =
-
-            posicion.coords.longitude;
-
-
-            const precision =
-
-            posicion.coords.accuracy;
-
-
-            if(
-                marcadorUsuario
-            ){
-
-                marcadorUsuario
-                .setLatLng(
-                    [lat,lon]
-                );
-
-
-                circuloPrecision
-                .setLatLng(
-                    [lat,lon]
-                );
-
-
-                circuloPrecision
-                .setRadius(
-                    precision
-                );
-
-            }
-
-            else{
-
-
-                marcadorUsuario =
-
-                L.circleMarker(
-
-                    [lat,lon],
-
-                    {
-
-                        radius:8,
-
-                        color:"white",
-
-                        weight:3,
-
-                        fillColor:"#1976d2",
-
-                        fillOpacity:1
-
-                    }
-
-                )
-
-                .addTo(mapa)
-
-                .bindPopup(
-                    "📍 Usted está aquí"
-                );
-
-
-                circuloPrecision =
-
-                L.circle(
-
-                    [lat,lon],
-
-                    {
-
-                        radius:
-                        precision,
-
-                        weight:1,
-
-                        color:"#1976d2",
-
-                        fillColor:"#1976d2",
-
-                        fillOpacity:.08
-
-                    }
-
-                )
-
-                .addTo(mapa);
-
-            }
-
-
-            mapa.flyTo(
-
-                [lat,lon],
-
-                20
-
-            );
-
-
-            marcadorUsuario
-            .openPopup();
-
-
-            estado.innerHTML =
-
-            "📍 Precisión aproximada: " +
-
-            Math.round(
-                precision
-            )
-
-            +
-
-            " m";
-
-
-        },
-
-
-        function(error){
-
-
-            console.error(
-                error
-            );
-
-
-            estado.innerHTML =
-
-            "⚠️ No fue posible obtener ubicación";
-
-
-            alert(
-
-                "Autoriza el uso de ubicación en el navegador."
-
-            );
-
-
-        },
-
-
-        {
-
-            enableHighAccuracy:true,
-
-            timeout:15000,
-
-            maximumAge:0
-
-        }
-
-
-    );
-
-
-}
-
-);
-
-
-
-/* =====================================================
-   RED DE SENDEROS Y NAVEGACIÓN INTERNA
-===================================================== */
-
-function distanciaMetros(a,b){
-    const R = 6371000;
-    const lat1 = a.lat * Math.PI/180;
-    const lat2 = b.lat * Math.PI/180;
-    const dLat = (b.lat-a.lat) * Math.PI/180;
-    const dLon = (b.lng-a.lng) * Math.PI/180;
-    const h = Math.sin(dLat/2)**2 +
-              Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1-h));
-}
-
-function obtenerOCrearNodo(punto){
-    for(const nodo of nodosRed){
-        if(distanciaMetros(nodo,punto) <= 1.5) return nodo;
-    }
-    const nuevo = {
-        id:nodosRed.length,
-        lat:punto.lat,
-        lng:punto.lng,
-        conexiones:[]
-    };
-    nodosRed.push(nuevo);
-    return nuevo;
-}
-
-function estanConectados(a,b){
-    return a.conexiones.some(c => c.nodo.id === b.id);
-}
-
-function conectarNodos(a,b){
-    if(estanConectados(a,b)) return;
-    const d = distanciaMetros(a,b);
-    a.conexiones.push({nodo:b,distancia:d});
-    b.conexiones.push({nodo:a,distancia:d});
-}
-
-function construirRed(datos){
-    nodosRed = [];
-
-    for(const feature of datos.features || []){
-        if(!feature.geometry || feature.geometry.type !== "LineString") continue;
-        const coords = feature.geometry.coordinates;
-        let anterior = null;
-
-        for(const c of coords){
-            const actual = obtenerOCrearNodo({lat:c[1],lng:c[0]});
-            if(anterior) conectarNodos(anterior,actual);
-            anterior = actual;
-        }
-    }
-
-    // Une pequeños espacios de digitalización entre senderos.
-    const toleranciaUnion = 8; // metros
-    for(let i=0;i<nodosRed.length;i++){
-        for(let j=i+1;j<nodosRed.length;j++){
-            const a = nodosRed[i];
-            const b = nodosRed[j];
-            if(distanciaMetros(a,b) <= toleranciaUnion) conectarNodos(a,b);
-        }
-    }
-
-    console.log("Red de senderos lista:", nodosRed.length, "nodos");
-}
-
-function nodoMasCercano(punto){
-    let mejor = null;
-    let dMejor = Infinity;
-    for(const nodo of nodosRed){
-        const d = distanciaMetros(punto,nodo);
-        if(d < dMejor){
-            dMejor = d;
-            mejor = nodo;
-        }
-    }
-    return {nodo:mejor,distancia:dMejor};
-}
-
-function calcularCamino(inicio,fin){
-    const dist = {};
-    const prev = {};
-    const pendientes = new Set();
-
-    for(const n of nodosRed){
-        dist[n.id] = Infinity;
-        pendientes.add(n.id);
-    }
-    dist[inicio.id] = 0;
-
-    while(pendientes.size){
-        let actual = null;
-        let mejor = Infinity;
-        for(const id of pendientes){
-            if(dist[id] < mejor){
-                mejor = dist[id];
-                actual = id;
-            }
-        }
-        if(actual === null) break;
-        if(actual === fin.id) break;
-
-        pendientes.delete(actual);
-        const nodo = nodosRed[actual];
-
-        for(const c of nodo.conexiones){
-            if(!pendientes.has(c.nodo.id)) continue;
-            const nd = dist[actual] + c.distancia;
-            if(nd < dist[c.nodo.id]){
-                dist[c.nodo.id] = nd;
-                prev[c.nodo.id] = actual;
-            }
-        }
-    }
-
-    if(dist[fin.id] === Infinity) return null;
-
-    const camino = [];
-    let actual = fin.id;
-    while(actual !== undefined){
-        camino.unshift(nodosRed[actual]);
-        if(actual === inicio.id) break;
-        actual = prev[actual];
-    }
-
-    return {camino,distancia:dist[fin.id]};
-}
-
-function navegarA(layer,nombre){
-    if(!marcadorUsuario){
-        alert("Primero pulsa 📍 Mi ubicación.");
-        return;
-    }
-
-    if(!nodosRed.length){
-        alert("La red de senderos todavía no ha cargado.");
-        return;
-    }
-
-    const origen = marcadorUsuario.getLatLng();
-    const destino = layer.getLatLng();
-    const inicio = nodoMasCercano(origen);
-    const fin = nodoMasCercano(destino);
-
-    if(!inicio.nodo || !fin.nodo){
-        alert("No fue posible ubicar el origen o destino sobre la red.");
-        return;
-    }
-
-    if(inicio.distancia > 100){
-        alert("Tu ubicación está fuera de la red de senderos que hemos mapeado por ahora.");
-        return;
-    }
-
-    const resultado = calcularCamino(inicio.nodo,fin.nodo);
-    if(!resultado){
-        alert("No encontramos una ruta conectada hasta este destino.");
-        return;
-    }
-
-    if(rutaActual) mapa.removeLayer(rutaActual);
-
-    const puntosRuta = [
-        origen,
-        ...resultado.camino.map(n => [n.lat,n.lng]),
-        destino
-    ];
-
-    rutaActual = L.polyline(puntosRuta,{
+  }else{
+    marcadorUsuario = L.circleMarker(
+      [lat,lon],
+      {
+        radius:8,
+        color:"white",
+        weight:3,
+        fillColor:"#1976d2",
+        fillOpacity:1
+      }
+    ).addTo(mapa).bindPopup(texto);
+
+    circuloPrecision = L.circle(
+      [lat,lon],
+      {
+        radius:precision,
+        weight:1,
         color:"#1976d2",
-        weight:7,
-        opacity:.92,
-        lineJoin:"round",
-        lineCap:"round"
-    }).addTo(mapa);
+        fillColor:"#1976d2",
+        fillOpacity:.08
+      }
+    ).addTo(mapa);
+  }
 
-    const distanciaTotal = resultado.distancia + inicio.distancia + fin.distancia;
-    const minutos = Math.max(1,Math.round(distanciaTotal/75));
-
-    estado.innerHTML =
-        "🧭 " + nombre + " · " +
-        Math.round(distanciaTotal) + " m · " +
-        minutos + " min caminando";
-
-    mapa.fitBounds(rutaActual.getBounds(),{padding:[60,60]});
+  marcadorUsuario.bindPopup(texto);
+  mapa.flyTo([lat,lon],20);
+  marcadorUsuario.openPopup();
 }
 
-/* Cargar senderos Pangea */
-fetch("./senderos_pangea.geojson?v=4")
-.then(r => {
-    if(!r.ok) throw new Error("No se encontró senderos_pangea.geojson");
-    return r.json();
-})
-.then(datos => construirRed(datos))
-.catch(err => console.error(err));
+document.getElementById("ubicacion").addEventListener("click",function(){
+  if(!navigator.geolocation){
+    alert("Este dispositivo no permite obtener ubicación.");
+    return;
+  }
 
+  estado.textContent = "📡 Buscando ubicación...";
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const precision = pos.coords.accuracy;
+
+      ponerUbicacion(lat,lon,precision,"📍 Usted está aquí");
+
+      estado.textContent =
+        "📍 Precisión aproximada: " + Math.round(precision) + " m";
+    },
+
+    function(error){
+      console.error(error);
+      estado.textContent = "⚠️ No fue posible obtener ubicación";
+      alert("Autoriza el uso de ubicación en el navegador.");
+    },
+
+    {
+      enableHighAccuracy:true,
+      timeout:15000,
+      maximumAge:0
+    }
+  );
+});
 
 /* =====================================================
-   DIAGNÓSTICO TESELAS
+   MODO PRUEBA - ENTRADA PANGEA
 ===================================================== */
+document.getElementById("modoPrueba").addEventListener("click",function(){
+  // Punto situado sobre el inicio de la Vía Pangea que digitalizaste.
+  ponerUbicacion(
+    5.923356428386153,
+    -74.728420095808190,
+    5,
+    "🧪 Ubicación de prueba: entrada Pangea"
+  );
 
-ortomosaico.on(
+  estado.textContent =
+    "🧪 Modo prueba activo. Ahora toca un destino y luego Cómo llegar.";
+});
 
-"tileerror",
-
-function(error){
-
-    console.log(
-
-        "Tesela no encontrada:",
-
-        error.tile.src
-
-    );
-
-}
-
-);
-
-
+/* =====================================================
+   DIAGNÓSTICO
+===================================================== */
+ortomosaico.on("tileerror",function(error){
+  console.log("Tesela no encontrada:",error.tile.src);
+});
 </script>
-
 </body>
 </html>
