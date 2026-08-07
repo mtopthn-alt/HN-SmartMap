@@ -184,6 +184,7 @@ body{
 
 .popup-boton{
     display:block;
+    box-sizing:border-box;
 
     padding:8px 10px;
 
@@ -235,9 +236,9 @@ body{
         HN SmartMap
     </div>
 
-    <div class="subtitulo">
-        Mundo Pangea
-    </div>
+    <div class="subtitulo">Mundo Pangea</div>
+
+    <div id="horarioPangea" class="estado" style="margin-top:0;margin-bottom:10px;font-weight:bold;"></div>
 
     <input
         id="buscar"
@@ -468,14 +469,31 @@ document.getElementById("estado");
 const buscar =
 document.getElementById("buscar");
 
+const horarioPangea = document.getElementById("horarioPangea");
+
 
 /* =====================================================
    VARIABLES
 ===================================================== */
 
 let puntosCargados = [];
-
 let capaPuntos;
+let marcadorUsuario = null;
+let circuloPrecision = null;
+let rutaActual = null;
+let nodosRed = [];
+window.destinosHN = {};
+
+function actualizarHorarioPangea(){
+    const ahora = new Date();
+    const dia = ahora.getDay(); // 0 domingo
+    const hora = ahora.getHours() + ahora.getMinutes()/60;
+    const abierto = [0,4,5,6].includes(dia) && hora >= 10 && hora < 16;
+    horarioPangea.innerHTML = abierto
+        ? "🟢 Abierto · Jueves a domingo · 10:00 a. m. – 4:00 p. m."
+        : "🔴 Cerrado · Jueves a domingo · 10:00 a. m. – 4:00 p. m.";
+}
+actualizarHorarioPangea();
 
 
 /* =====================================================
@@ -692,6 +710,8 @@ datos => {
                 const emoji =
                 emojiTipo(tipo);
 
+                window.destinosHN[nombre] = { layer:layer, feature:feature };
+
 
                 /* =============================
                    POPUP
@@ -737,24 +757,11 @@ datos => {
 
 
                 popup +=
-
-                '<a class="popup-boton" ' +
-
-                'target="_blank" ' +
-
-                'href="https://www.google.com/maps/dir/?api=1&destination=' +
-
-                coordenadas.lat +
-
-                "," +
-
-                coordenadas.lng +
-
-                '">' +
-
+                '<button class="popup-boton" ' +
+                'style="border:0;width:100%;cursor:pointer;" ' +
+                'onclick="navegarA(window.destinosHN[' + JSON.stringify(nombre) + '].layer,' + JSON.stringify(nombre) + ')">' +
                 "🧭 Cómo llegar" +
-
-                "</a>";
+                "</button>";
 
 
                 layer.bindPopup(
@@ -951,10 +958,6 @@ function(){
 /* =====================================================
    GPS
 ===================================================== */
-
-let marcadorUsuario = null;
-
-let circuloPrecision = null;
 
 
 document
@@ -1161,6 +1164,206 @@ function(){
 }
 
 );
+
+
+
+/* =====================================================
+   RED DE SENDEROS Y NAVEGACIÓN INTERNA
+===================================================== */
+
+function distanciaMetros(a,b){
+    const R = 6371000;
+    const lat1 = a.lat * Math.PI/180;
+    const lat2 = b.lat * Math.PI/180;
+    const dLat = (b.lat-a.lat) * Math.PI/180;
+    const dLon = (b.lng-a.lng) * Math.PI/180;
+    const h = Math.sin(dLat/2)**2 +
+              Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1-h));
+}
+
+function obtenerOCrearNodo(punto){
+    for(const nodo of nodosRed){
+        if(distanciaMetros(nodo,punto) <= 1.5) return nodo;
+    }
+    const nuevo = {
+        id:nodosRed.length,
+        lat:punto.lat,
+        lng:punto.lng,
+        conexiones:[]
+    };
+    nodosRed.push(nuevo);
+    return nuevo;
+}
+
+function estanConectados(a,b){
+    return a.conexiones.some(c => c.nodo.id === b.id);
+}
+
+function conectarNodos(a,b){
+    if(estanConectados(a,b)) return;
+    const d = distanciaMetros(a,b);
+    a.conexiones.push({nodo:b,distancia:d});
+    b.conexiones.push({nodo:a,distancia:d});
+}
+
+function construirRed(datos){
+    nodosRed = [];
+
+    for(const feature of datos.features || []){
+        if(!feature.geometry || feature.geometry.type !== "LineString") continue;
+        const coords = feature.geometry.coordinates;
+        let anterior = null;
+
+        for(const c of coords){
+            const actual = obtenerOCrearNodo({lat:c[1],lng:c[0]});
+            if(anterior) conectarNodos(anterior,actual);
+            anterior = actual;
+        }
+    }
+
+    // Une pequeños espacios de digitalización entre senderos.
+    const toleranciaUnion = 8; // metros
+    for(let i=0;i<nodosRed.length;i++){
+        for(let j=i+1;j<nodosRed.length;j++){
+            const a = nodosRed[i];
+            const b = nodosRed[j];
+            if(distanciaMetros(a,b) <= toleranciaUnion) conectarNodos(a,b);
+        }
+    }
+
+    console.log("Red de senderos lista:", nodosRed.length, "nodos");
+}
+
+function nodoMasCercano(punto){
+    let mejor = null;
+    let dMejor = Infinity;
+    for(const nodo of nodosRed){
+        const d = distanciaMetros(punto,nodo);
+        if(d < dMejor){
+            dMejor = d;
+            mejor = nodo;
+        }
+    }
+    return {nodo:mejor,distancia:dMejor};
+}
+
+function calcularCamino(inicio,fin){
+    const dist = {};
+    const prev = {};
+    const pendientes = new Set();
+
+    for(const n of nodosRed){
+        dist[n.id] = Infinity;
+        pendientes.add(n.id);
+    }
+    dist[inicio.id] = 0;
+
+    while(pendientes.size){
+        let actual = null;
+        let mejor = Infinity;
+        for(const id of pendientes){
+            if(dist[id] < mejor){
+                mejor = dist[id];
+                actual = id;
+            }
+        }
+        if(actual === null) break;
+        if(actual === fin.id) break;
+
+        pendientes.delete(actual);
+        const nodo = nodosRed[actual];
+
+        for(const c of nodo.conexiones){
+            if(!pendientes.has(c.nodo.id)) continue;
+            const nd = dist[actual] + c.distancia;
+            if(nd < dist[c.nodo.id]){
+                dist[c.nodo.id] = nd;
+                prev[c.nodo.id] = actual;
+            }
+        }
+    }
+
+    if(dist[fin.id] === Infinity) return null;
+
+    const camino = [];
+    let actual = fin.id;
+    while(actual !== undefined){
+        camino.unshift(nodosRed[actual]);
+        if(actual === inicio.id) break;
+        actual = prev[actual];
+    }
+
+    return {camino,distancia:dist[fin.id]};
+}
+
+function navegarA(layer,nombre){
+    if(!marcadorUsuario){
+        alert("Primero pulsa 📍 Mi ubicación.");
+        return;
+    }
+
+    if(!nodosRed.length){
+        alert("La red de senderos todavía no ha cargado.");
+        return;
+    }
+
+    const origen = marcadorUsuario.getLatLng();
+    const destino = layer.getLatLng();
+    const inicio = nodoMasCercano(origen);
+    const fin = nodoMasCercano(destino);
+
+    if(!inicio.nodo || !fin.nodo){
+        alert("No fue posible ubicar el origen o destino sobre la red.");
+        return;
+    }
+
+    if(inicio.distancia > 100){
+        alert("Tu ubicación está fuera de la red de senderos que hemos mapeado por ahora.");
+        return;
+    }
+
+    const resultado = calcularCamino(inicio.nodo,fin.nodo);
+    if(!resultado){
+        alert("No encontramos una ruta conectada hasta este destino.");
+        return;
+    }
+
+    if(rutaActual) mapa.removeLayer(rutaActual);
+
+    const puntosRuta = [
+        origen,
+        ...resultado.camino.map(n => [n.lat,n.lng]),
+        destino
+    ];
+
+    rutaActual = L.polyline(puntosRuta,{
+        color:"#1976d2",
+        weight:7,
+        opacity:.92,
+        lineJoin:"round",
+        lineCap:"round"
+    }).addTo(mapa);
+
+    const distanciaTotal = resultado.distancia + inicio.distancia + fin.distancia;
+    const minutos = Math.max(1,Math.round(distanciaTotal/75));
+
+    estado.innerHTML =
+        "🧭 " + nombre + " · " +
+        Math.round(distanciaTotal) + " m · " +
+        minutos + " min caminando";
+
+    mapa.fitBounds(rutaActual.getBounds(),{padding:[60,60]});
+}
+
+/* Cargar senderos Pangea */
+fetch("./senderos_pangea.geojson?v=4")
+.then(r => {
+    if(!r.ok) throw new Error("No se encontró senderos_pangea.geojson");
+    return r.json();
+})
+.then(datos => construirRed(datos))
+.catch(err => console.error(err));
 
 
 /* =====================================================
