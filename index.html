@@ -1,64 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>HN SmartMap - Pangea</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
 
 <style>
-
-html,body{
-height:100%;
-margin:0;
+html, body {
+  height: 100%;
+  margin: 0;
 }
 
-#map{
-height:100%;
-width:100%;
+#map {
+  height: 100%;
+  width: 100%;
 }
 
-.info{
-position:absolute;
-top:10px;
-left:10px;
-z-index:1000;
-background:white;
-padding:10px;
-border-radius:8px;
-font-family:Arial;
-box-shadow:0 0 10px rgba(0,0,0,.3);
+.info {
+  position: absolute;
+  top: 10px;
+  left: 50px;
+  z-index: 1000;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: Arial;
+  box-shadow: 0 0 10px rgba(0,0,0,.3);
+  width: 260px;
 }
 
-button{
-width:100%;
-margin-top:6px;
-padding:8px;
-cursor:pointer;
+button {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  cursor: pointer;
 }
-
 </style>
-
 </head>
 
 <body>
 
 <div class="info">
+  <b>HN SmartMap</b><br>
+  Mundo Pangea<br><br>
 
-<b>HN SmartMap</b><br>
-Pangea<br><br>
+  <div id="lista"></div>
 
-<div id="lista"></div>
-
-<button onclick="ubicar()">
-
-Mi ubicación
-
-</button>
-
+  <button onclick="ubicar()">📍 Mi ubicación</button>
 </div>
 
 <div id="map"></div>
@@ -67,123 +61,200 @@ Mi ubicación
 
 <script>
 
-var mapa=L.map('map');
+// ---------------------------
+// CREAR MAPA
+// ---------------------------
 
-var limites=[
+var mapa = L.map('map', {
+  minZoom: 16,
+  maxZoom: 22
+});
 
-[5.922010,-74.728629],
 
-[5.925396,-74.724673]
+// ---------------------------
+// MAPA BASE OPENSTREETMAP
+// ---------------------------
 
+var osm = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    maxZoom: 22,
+    attribution: '&copy; OpenStreetMap'
+  }
+).addTo(mapa);
+
+
+// ---------------------------
+// ORTOMOSAICO PANGEA
+// TESSELAS GENERADAS POR QGIS
+// ---------------------------
+
+var pangea = L.tileLayer(
+  './{z}/{x}/{y}.jpg',
+  {
+    minZoom: 17,
+    maxZoom: 21,
+    maxNativeZoom: 21,
+    tms: false,
+    opacity: 1
+  }
+).addTo(mapa);
+
+
+// ---------------------------
+// EXTENSIÓN DE PANGEA
+// ---------------------------
+
+var limites = [
+  [5.922010, -74.728629],
+  [5.925396, -74.724673]
 ];
-
-L.tileLayer(
-
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-
-{
-
-maxZoom:22
-
-}
-
-).addTo(mapa);
-
-L.imageOverlay(
-
-'Ortomosaico_2.jpg',
-
-limites
-
-).addTo(mapa);
 
 mapa.fitBounds(limites);
 
+
+// ---------------------------
+// CONTROL DE CAPAS
+// ---------------------------
+
+L.control.layers(
+  {
+    "OpenStreetMap": osm
+  },
+  {
+    "Ortomosaico Pangea": pangea
+  }
+).addTo(mapa);
+
+
+// ---------------------------
+// CARGAR PUNTOS GEOJSON
+// ---------------------------
+
 fetch('puntos_pangea.geojson')
 
-.then(r=>r.json())
+.then(r => r.json())
 
 .then(function(datos){
 
-var lista=document.getElementById("lista");
+  var lista = document.getElementById("lista");
 
-L.geoJSON(datos,{
+  L.geoJSON(datos, {
 
-onEachFeature:function(feature,layer){
+    onEachFeature: function(feature, layer){
 
-var nombre=feature.properties.Nombre;
+      var nombre =
+        feature.properties.Nombre ||
+        feature.properties.nombre ||
+        "Punto de interés";
 
-layer.bindPopup("<b>"+nombre+"</b>");
+      var tipo =
+        feature.properties.Tipo ||
+        feature.properties.tipo ||
+        "";
 
-var b=document.createElement("button");
+      var descripcion =
+        feature.properties.descripcion ||
+        feature.properties.Descripcion ||
+        "";
 
-b.innerHTML=nombre;
+      var contenido =
+        "<b>" + nombre + "</b>";
 
-b.onclick=function(){
+      if(tipo){
+        contenido += "<br>" + tipo;
+      }
 
-mapa.flyTo(layer.getLatLng(),20);
+      if(descripcion){
+        contenido += "<br>" + descripcion;
+      }
 
-layer.openPopup();
+      layer.bindPopup(contenido);
 
-};
+      var boton = document.createElement("button");
 
-lista.appendChild(b);
+      boton.innerHTML = nombre;
 
-}
+      boton.onclick = function(){
 
-}).addTo(mapa);
+        mapa.flyTo(
+          layer.getLatLng(),
+          20
+        );
+
+        layer.openPopup();
+
+      };
+
+      lista.appendChild(boton);
+
+    }
+
+  }).addTo(mapa);
 
 });
+
+
+// ---------------------------
+// UBICACIÓN DEL VISITANTE
+// ---------------------------
+
+var marcadorUsuario;
+
 function ubicar(){
 
-if(navigator.geolocation){
+  if(!navigator.geolocation){
 
-navigator.geolocation.getCurrentPosition(
+    alert("Su navegador no soporta GPS.");
+    return;
 
-function(pos){
+  }
 
-var lat=pos.coords.latitude;
+  navigator.geolocation.getCurrentPosition(
 
-var lon=pos.coords.longitude;
+    function(pos){
 
-L.marker([lat,lon])
+      var lat = pos.coords.latitude;
+      var lon = pos.coords.longitude;
 
-.addTo(mapa)
+      if(marcadorUsuario){
 
-.bindPopup("📍 Usted está aquí")
+        marcadorUsuario.setLatLng([lat,lon]);
 
-.openPopup();
+      } else {
 
-mapa.flyTo([lat,lon],20);
+        marcadorUsuario = L.marker([lat,lon])
+        .addTo(mapa)
+        .bindPopup("📍 Usted está aquí");
 
-},
+      }
 
-function(){
+      marcadorUsuario.openPopup();
 
-alert("No fue posible obtener la ubicación.");
+      mapa.flyTo(
+        [lat,lon],
+        20
+      );
 
-},
+    },
 
-{
+    function(){
 
-enableHighAccuracy:true
+      alert("No fue posible obtener la ubicación. Autoriza el GPS.");
 
-}
+    },
 
-);
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
 
-}
-
-else{
-
-alert("Su navegador no soporta GPS.");
-
-}
+  );
 
 }
 
 </script>
 
 </body>
-
 </html>
